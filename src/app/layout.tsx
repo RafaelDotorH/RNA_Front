@@ -1,4 +1,4 @@
-import { AuthProvider } from './lib/AuthContext'; // Importa desde la ubicación correcta
+import { AuthProvider } from './lib/authContext';
 import './globals.css';
 import type { Metadata } from 'next'
 import { Inter } from 'next/font/google'

@@ -4,7 +4,7 @@ import { IonIcon } from '@ionic/react';
 import { homeOutline, logOutOutline, libraryOutline, settingsOutline, informationOutline } from 'ionicons/icons';
 import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthContext } from '../app/lib/AuthContext';
+import { AuthContext } from '@/app/lib/authContext';
 
 export default function MenuNav() {
     const { logout } = useContext(AuthContext);
