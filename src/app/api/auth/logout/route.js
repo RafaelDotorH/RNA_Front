@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-export async function POST(req, res) {
+export async function POST() {
   try {
     return new Response(JSON.stringify({ message: 'Sesión cerrada' }), {
       status: 200,
