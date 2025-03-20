@@ -20,6 +20,7 @@ function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
+    const [rol, setRol]= useState('');
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
@@ -33,7 +34,6 @@ function LoginPage() {
     const handleMouseDownPassword = useCallback((event) => {
         event.preventDefault();
     }, []);
-
 
     const handleSubmit = async (event) => { // <-- async AQUI es OBLIGATORIO
         event.preventDefault();
@@ -73,7 +73,7 @@ function LoginPage() {
                     headers: {
                         'Content-Type': 'application/json',
                     },
-                    body: JSON.stringify({ username, email, password }),
+                    body: JSON.stringify({ username, email, password, rol }),
                 });
 
                 if (response.ok) {
@@ -97,6 +97,7 @@ function LoginPage() {
         setPassword('');
         setEmail('');
         setConfirmPassword('');
+        setRol('');
     };
 
     return (

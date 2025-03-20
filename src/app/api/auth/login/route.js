@@ -25,8 +25,6 @@ export async function POST(req) {
             return NextResponse.json({ message: 'Error interno del servidor (contraseña no encontrada)' }, { status: 500 });
         }
 
-        console.log("contraseña original: ", password) // Descomenta para depurar si es necesario
-        console.log ("contraseña hasheada:", user.passwordHash) // Descomenta para depurar si es necesario
 
         const isPasswordValid = await bcrypt.compare(password, user.passwordHash); // Solo una comparación
 
@@ -35,14 +33,12 @@ export async function POST(req) {
         if (!isPasswordValid) {
             return NextResponse.json({ message: 'Usuario o contraseña incorrecta' }, { status: 401 }); // Mensaje unificado
         }
-        // --- Generación del JWT ---
         const token = jwt.sign(
             { userId: user._id, username: user.username },
             process.env.JWT_SECRET, // Asegúrate de tener esta variable de entorno definida
             { expiresIn: '1h' } // O el tiempo de expiración que desees
         );
 
-        // --- Respuesta con Cookie ---
         return new Response(JSON.stringify({ message: 'Inicio de sesión exitoso', token }), { // Devuelve el token en la respuesta JSON *y* en la cookie
             status: 200,
             headers: {

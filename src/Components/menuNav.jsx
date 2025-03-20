@@ -4,22 +4,33 @@ import { IonIcon } from '@ionic/react';
 import { homeOutline, logOutOutline, libraryOutline, settingsOutline, informationOutline } from 'ionicons/icons';
 import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthContext } from '@/app/lib/authContext';
 
 export default function MenuNav() {
-    const { logout } = useContext(AuthContext);
     const router = useRouter();
 
-    const handleLogout = () => {
-        logout();
-        router.push('/');
-    };
+    async function signOut() {
+        try {
+          const response = await fetch('/api/auth/logout', {
+            method: 'POST',
+          });
+          if (response.ok) {
+            // Limpia también el estado del usuario en el frontend y cualquier otra cosa que necesites.
+            console.log('Sesión cerrada correctamente');
+            router.push('/');// esto redirige al usuario a la página principal.
+          } else {
+            console.error('Error al cerrar sesión');
+          }
+        } catch (error) {
+          console.error('Error de red al cerrar sesión:', error);
+        }
+      }
 
     return (
         <nav id="navbar">
             <ul className="navbar-items flexbox-col">
                 <li className="navbar-logo flexbox-left">
-                    <Link href="/" className="navbar-item-inner flexbox">
+                    <Link href="/menu" className="navbar-item-inner flexbox">
+
                     </Link>
                 </li>
                 <li className="navbar-item flexbox-left">
@@ -58,11 +69,11 @@ export default function MenuNav() {
 
                     </Link>
                 </li>
-                <li className="navbar-item-inner flexbox-left" onClick={handleLogout}>
-                        <div className="navbar-item-inner-icon-wrapper flexbox">
-                            <IonIcon icon={logOutOutline} />
-                        </div>
-                        <span className="link-text">Cerra Sesion</span>
+                <li className="navbar-item-inner flexbox-left" onClick={signOut}>
+                    <div className="navbar-item-inner-icon-wrapper flexbox">
+                        <IonIcon icon={logOutOutline} />
+                    </div>
+                    <span className="link-text">Cerra Sesion</span>
                 </li>
             </ul>
         </nav>

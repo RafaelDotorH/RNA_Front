@@ -6,10 +6,12 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 import LocomotiveScroll from 'locomotive-scroll';
 import MenuNav from '../../Components/menuNav';
 import Fooder from '../../Components/fooder';
+import { useRouter } from 'next/navigation';
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Menu = () => {
+    const router = useRouter();
     const containerRef = useRef(null);
     const bodyRef = useRef(document.body);
 
