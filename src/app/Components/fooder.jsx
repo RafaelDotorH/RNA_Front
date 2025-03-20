@@ -1,6 +1,6 @@
 import React from 'react';
 
-const Footer = () => {
+export default function Fooder() {
     return (
         <footer style={footerStyle}>
             <p>&copy; {new Date().getFullYear()} Your Company. All rights reserved.</p>
@@ -17,5 +17,3 @@ const footerStyle = {
     textAlign: 'center',
     padding: '10px 0'
 };
-
-export default Footer;

@@ -2,7 +2,7 @@
 import '../CSS/general.css';
 import React, { useState, useRef } from 'react';
 import MenuNav from '../components/menuNav';
-import Footer from '../components/fooder';
+import Fooder from '../components/fooder';
 
 function Principal() {
     const [image, setImage] = useState(null);
@@ -124,7 +124,7 @@ function Principal() {
 
             </div>
             <MenuNav />
-            <Footer />
+            <Fooder />
         </>
     );
 };

@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
 import MenuNav from '../components/menuNav';
-import Footer from '../components/fooder';
+import Fooder from '../components/fooder';
 
 
 const Nosotros = () => {
@@ -33,7 +33,7 @@ const Nosotros = () => {
                 </div>
             </div>
             <MenuNav />
-            <Footer />
+            <Fooder />
         </>
     );
 };

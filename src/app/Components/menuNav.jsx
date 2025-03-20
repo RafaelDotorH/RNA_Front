@@ -6,7 +6,7 @@ import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
 import { AuthContext } from '../lib/AuthContext';
 
-const MenuNav = () => {
+export default function MenuNav() {
     const { logout } = useContext(AuthContext);
     const router = useRouter();
 
@@ -71,5 +71,3 @@ const MenuNav = () => {
         </nav>
     );
 };
-
-export default MenuNav;

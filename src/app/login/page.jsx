@@ -1,4 +1,3 @@
-// src/app/login/page.jsx
 'use client'
 import React, { useState, useCallback } from 'react';
 import TextField from '@mui/material/TextField';
@@ -17,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import '../CSS/login.css';
 
 
-function LoginPage() {  // <--  Nombre del componente: LoginPage
+function LoginPage() { 
     const [showPassword, setShowPassword] = useState(false);
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');

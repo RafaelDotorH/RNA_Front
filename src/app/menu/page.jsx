@@ -5,7 +5,7 @@ import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import LocomotiveScroll from 'locomotive-scroll';
 import MenuNav from '../components/menuNav';
-import Footer from '../components/fooder';
+import Fooder from '../components/fooder';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -93,7 +93,7 @@ const Menu = () => {
                     <p>Contenido de la sección 2</p>
                 </section>
             </div>
-            <Footer/>
+            <Fooder/>
         </div>
     );
 };
