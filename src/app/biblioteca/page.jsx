@@ -1,7 +1,7 @@
 "use client"
 import React, { useState } from 'react'; // No necesitas useRef aquí, useState es suficiente.
-import MenuNav from '../components/menuNav';
-import Fooder from '../components/fooder';
+import MenuNav from '../../Components/menuNav';
+import Fooder from '../../Components/fooder';
 
 const Biblioteca = () => {
     const [articulos, setArticulos] = useState([]); // Inicializa con un array vacío, no [null].

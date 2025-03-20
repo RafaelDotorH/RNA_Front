@@ -1,10 +1,10 @@
 import Link from 'next/link'; // Importa el componente Link de Next.js
-import '../CSS/menuNav.css'
+import './menuNav.css'
 import { IonIcon } from '@ionic/react';
 import { homeOutline, logOutOutline, libraryOutline, settingsOutline, informationOutline } from 'ionicons/icons';
 import React, { useContext } from 'react';
 import { useRouter } from 'next/navigation';
-import { AuthContext } from '../lib/AuthContext';
+import { AuthContext } from '../app/lib/AuthContext';
 
 export default function MenuNav() {
     const { logout } = useContext(AuthContext);
@@ -20,9 +20,6 @@ export default function MenuNav() {
             <ul className="navbar-items flexbox-col">
                 <li className="navbar-logo flexbox-left">
                     <Link href="/" className="navbar-item-inner flexbox">
-                        <div className="logo">
-                            <img src={require('../resources/logo.png')} alt="Logo" style={{ width: 50, height: 50, opacity: 0.5 }} />
-                        </div>
                     </Link>
                 </li>
                 <li className="navbar-item flexbox-left">

@@ -1,8 +1,8 @@
 "use client"
 import '../CSS/general.css';
 import React, { useState, useRef } from 'react';
-import MenuNav from '../components/menuNav';
-import Fooder from '../components/fooder';
+import MenuNav from '../../Components/menuNav';
+import Fooder from '../../Components/fooder';
 
 function Principal() {
     const [image, setImage] = useState(null);

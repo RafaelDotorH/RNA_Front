@@ -4,8 +4,8 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
 import LocomotiveScroll from 'locomotive-scroll';
-import MenuNav from '../components/menuNav';
-import Fooder from '../components/fooder';
+import MenuNav from '../../Components/menuNav';
+import Fooder from '../../Components/fooder';
 
 gsap.registerPlugin(ScrollTrigger);
 
