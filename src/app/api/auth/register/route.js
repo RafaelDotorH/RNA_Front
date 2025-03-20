@@ -25,6 +25,7 @@ export async function POST(req) {
             username,
             email,
             passwordHash: hashedPassword, // Guarda el hash
+            rol: "cliente"
         });
 
         await newUser.save();
