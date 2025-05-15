@@ -14,7 +14,7 @@ export const AuthProvider = ({ children }) => {
         if (token) {
           const storedUser = localStorage.getItem('user');
           if(storedUser){
-            setUser(JSON.parse(storedUser)) // Establece el usuario desde localStorage
+            setUser(JSON.parse(storedUser)) 
           }
             // Idealmente: Aquí también validarías el token con tu backend
         }
@@ -41,7 +41,7 @@ export const AuthProvider = ({ children }) => {
             localStorage.setItem('token', data.token);
             localStorage.setItem('user', JSON.stringify(data.user));
             setUser(data.user);
-            router.push('/profile'); //O a la pagina que quieras que vaya luego del login
+            router.push('/profile'); 
             return { success: true };
         } catch (error) {
             console.error("Error de inicio de sesión:", error);

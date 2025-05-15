@@ -182,7 +182,7 @@ function LoginPage() {
 
 
                                 <TextField
-                                    label={isLogin ? "Correo Electrónico" : "Nombre de Usuario (para mostrar)"}
+                                    label={isLogin ? "Correo Electrónico" : "Nombre de Usuario"}
                                     variant="outlined"
                                     margin="normal"
                                     fullWidth
@@ -200,7 +200,7 @@ function LoginPage() {
 
                                 {!isLogin && (
                                     <TextField
-                                        label="Correo Electrónico (para registro)"
+                                        label="Correo Electrónico"
                                         variant="outlined"
                                         margin="normal"
                                         fullWidth
