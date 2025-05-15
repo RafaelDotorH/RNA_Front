@@ -13,7 +13,6 @@ export function middleware(req) {
   return NextResponse.next();
 }
 
-// Configuración para aplicar el middleware a las rutas protegidas
 export const config = {
   matcher: ["/menu", "/principal", "/nosotros", "/biblioteca"], // Define las rutas protegidas
 };
