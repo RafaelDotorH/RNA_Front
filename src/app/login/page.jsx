@@ -62,8 +62,26 @@ function LoginPage() {
                 console.log('Usuario inició sesión con Firebase:', user);
 
                 if (user.emailVerified) {
-                    setSuccessMessage('Inicio de sesión exitoso. Redirigiendo...');
-                    router.push('/menu');
+                    // Obtener el ID Token de Firebase
+                    const idToken = await user.getIdToken(true); // true para forzar la actualización del token
+
+                    // Llamar a la API de backend para establecer la sesión/cookie con el token personalizado
+                    const apiResponse = await fetch('/api/auth/login', { // Asegúrate que esta es tu ruta API correcta
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({ username, idToken }),
+                    });
+
+                    const apiData = await apiResponse.json();
+
+                    if (apiResponse.ok) {
+                        setSuccessMessage(apiData.message || 'Inicio de sesión exitoso. Redirigiendo...');
+                        router.push('/menu');
+                    } else {
+                        setError(apiData.message || 'Error del servidor al procesar el inicio de sesión.');
+                    }
                 } else {
                     setError('Tu correo electrónico no ha sido verificado. Por favor, revisa tu bandeja de entrada (y spam o no deseado) para el correo de verificación.');
                 }
