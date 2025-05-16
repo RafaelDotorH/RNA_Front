@@ -14,7 +14,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import '../CSS/login.css'; // Tus estilos CSS personalizados
+import '../CSS/login.css';
 
 // Importaciones de Firebase
 import {
@@ -27,13 +27,13 @@ import { auth } from '../lib/firebasedb';
 
 function LoginPage() {
     const [showPassword, setShowPassword] = useState(false);
-    const [username, setUsername] = useState(''); // Para login, este será el email
+    const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
-    const [isLogin, setIsLogin] = useState(true); // true para login, false para registro
-    const [email, setEmail] = useState(''); // Para registro
+    const [isLogin, setIsLogin] = useState(true);
+    const [email, setEmail] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState(''); // Para mensajes de éxito/informativos
+    const [error, setError] = useState(''); //errores
+    const [successMessage, setSuccessMessage] = useState(''); // messages de estatus
     const router = useRouter();
 
     const handleClickShowPassword = useCallback(() => {
@@ -52,32 +52,30 @@ function LoginPage() {
 
         if (isLogin) {
             // --- Lógica de Inicio de Sesión con Firebase ---
-            if (!username || !password) {
+            if (!email || !password) {
                 setError("Por favor, ingresa tu correo y contraseña.");
                 return;
             }
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, username, password);
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
                 console.log('Usuario inició sesión con Firebase:', user);
 
                 if (user.emailVerified) {
-                    // Obtener el ID Token de Firebase
-                    const idToken = await user.getIdToken(true); // true para forzar la actualización del token
 
-                    // Llamar a la API de backend para establecer la sesión/cookie con el token personalizado
-                    const apiResponse = await fetch('/api/auth/login', { // Asegúrate que esta es tu ruta API correcta
+                    const idToken = await user.getIdToken(true);
+                    const apiResponse = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ username, idToken }),
+                        body: JSON.stringify({ email, idToken }),
                     });
 
                     const apiData = await apiResponse.json();
 
                     if (apiResponse.ok) {
-                        setSuccessMessage(apiData.message || 'Inicio de sesión exitoso. Redirigiendo...');
+                        setSuccessMessage(apiData.message);
                         router.push('/menu');
                     } else {
                         setError(apiData.message || 'Error del servidor al procesar el inicio de sesión.');
@@ -109,17 +107,31 @@ function LoginPage() {
                 return;
             }
             try {
-                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-                const user = userCredential.user;
-                console.log('Usuario registrado con Firebase:', user);
+                const apiResponseMongo = await fetch('/api/auth/register', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ username, email }),
+                });
+                const apiDataMongo = await apiResponseMongo.json();
+                if (apiResponseMongo.ok) {
+                    console.log(apiDataMongo.message);
+                    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                    const user = userCredential.user;
+                    console.log('Usuario registrado con Firebase:', user);
 
-                await sendEmailVerification(user);
-                setSuccessMessage('¡Registro exitoso! Se ha enviado un correo de verificación a tu dirección. Por favor, verifica tu correo antes de iniciar sesión.');
-                setIsLogin(true);
-                setUsername(email);
-                setEmail('');
-                setPassword('');
-                setConfirmPassword('');
+                    await sendEmailVerification(user);
+
+                    setSuccessMessage('¡Registro exitoso! Se ha enviado un correo de verificación a tu dirección. Por favor, verifica tu correo antes de iniciar sesión.');
+                    setIsLogin(true);
+                    setUsername('');
+                    setEmail(email);
+                    setPassword('');
+                    setConfirmPassword('');
+                } else {
+                    console.log(apiDataMongo.message || 'Error del servidor al procesar el registro.');
+                }
 
             } catch (err) {
                 console.error("Error al registrar con Firebase:", err.code, err.message);
@@ -136,30 +148,10 @@ function LoginPage() {
         }
     };
 
-    // Opcional: Función para reenviar el correo de verificación
-    const handleResendVerificationEmail = async () => {
-        setError('');
-        setSuccessMessage('');
-        if (auth.currentUser) {
-            try {
-                await sendEmailVerification(auth.currentUser);
-                setSuccessMessage('Se ha reenviado el correo de verificación. Revisa tu bandeja de entrada.');
-            } catch (err) {
-                console.error("Error al reenviar correo de verificación:", err);
-                setError('No se pudo reenviar el correo de verificación. Inténtalo más tarde.');
-            }
-        } else {
-            setError('Debes iniciar sesión primero para reenviar el correo de verificación.');
-        }
-    };
-
-
     const toggleMode = () => {
         setIsLogin(!isLogin);
         setError('');
         setSuccessMessage('');
-        // Limpiar campos al cambiar de modo, excepto quizás username si quieres que persista
-        // setUsername('');
         setPassword('');
         setEmail('');
         setConfirmPassword('');
@@ -177,46 +169,47 @@ function LoginPage() {
                                     {isLogin ? 'Iniciar Sesión' : 'Registrarse'}
                                 </Typography>
 
-                                {error && <Typography color="error" sx={{ textAlign: 'center', mb: 1, mt:1 }}>{error}</Typography>}
-                                {successMessage && <Typography color="success.main" sx={{ textAlign: 'center', mb: 1, mt:1 }}>{successMessage}</Typography>}
-
-
-                                <TextField
-                                    label={isLogin ? "Correo Electrónico" : "Nombre de Usuario"}
-                                    variant="outlined"
-                                    margin="normal"
-                                    fullWidth
-                                    value={username}
-                                    onChange={(e) => setUsername(e.target.value)}
-                                    InputProps={{
-                                        startAdornment: (
-                                            <InputAdornment position="start">
-                                                {isLogin ? <Email /> : <PersonOutline />}
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                    required={isLogin} // El correo es requerido para login
-                                />
+                                {error && <Typography color="error" sx={{ textAlign: 'center', mb: 1, mt: 1 }}>{error}</Typography>}
+                                {successMessage && <Typography color="success.main" sx={{ textAlign: 'center', mb: 1, mt: 1 }}>{successMessage}</Typography>}
 
                                 {!isLogin && (
                                     <TextField
-                                        label="Correo Electrónico"
+                                        label="Nombre de Usuario"
                                         variant="outlined"
                                         margin="normal"
                                         fullWidth
-                                        type="email"
-                                        value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        value={username}
+                                        onChange={(e) => setUsername(e.target.value)}
                                         InputProps={{
-                                            startAdornment:(
-                                                <InputAdornment position='start'>
-                                                    <Email />
+                                            startAdornment: (
+                                                <InputAdornment position="start">
+                                                    <PersonOutline />
                                                 </InputAdornment>
                                             ),
                                         }}
                                         required
                                     />
                                 )}
+
+
+                                <TextField
+                                    label="Correo Electrónico"
+                                    variant="outlined"
+                                    margin="normal"
+                                    fullWidth
+                                    type="email"
+                                    value={email}
+                                    onChange={(e) => setEmail(e.target.value)}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position='start'>
+                                                <Email />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    required={isLogin}
+                                />
+
 
                                 <TextField
                                     label="Contraseña"
@@ -262,6 +255,17 @@ function LoginPage() {
                                                 <InputAdornment position="start">
                                                     <LockOutlined />
                                                 </InputAdornment>
+                                            ), endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        aria-label="toggle password visibility"
+                                                        onClick={handleClickShowPassword}
+                                                        onMouseDown={handleMouseDownPassword}
+                                                        edge="end"
+                                                    >
+                                                        {showPassword ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
                                             ),
                                         }}
                                         required
@@ -279,16 +283,16 @@ function LoginPage() {
                                 <Box mt={1} textAlign="center">
                                     {isLogin ? (
                                         <>
-                                            <Typography variant="body2" component="span">
-                                                ¿No tienes una cuenta?{' '}
+                                            <Typography variant="body2" sx={{ mt: 2 }}>
+                                                <Button
+                                                    variant="text"
+                                                    onClick={toggleMode}
+                                                >
+                                                    ¿No tienes una cuenta?{' '}Regístrate
+                                                </Button>
                                             </Typography>
-                                            <Button
-                                                variant="text"
-                                                onClick={toggleMode}
-                                            >
-                                                Regístrate
-                                            </Button>
-                                            <Typography variant="body2" sx={{ mt: 1 }}>
+
+                                            <Typography variant="body2" sx={{ mt: 2 }}>
                                                 <Link href="/forgot-password" passHref>
                                                     <Button
                                                         variant="text"
@@ -301,15 +305,13 @@ function LoginPage() {
                                     ) : (
                                         <>
                                             <Typography variant="body2" component="span">
-                                                ¿Ya tienes una cuenta?{' '}
-                                            </Typography>
-                                            <Button
-                                                variant="text"
-                                                onClick={toggleMode}
-                                            >
-                                                Inicia Sesión
-                                            </Button>
-                                        </>
+                                                <Button
+                                                    variant="text"
+                                                    onClick={toggleMode}
+                                                >
+                                                    ¿Ya tienes una cuenta?{' '}Inicia Sesión
+                                                </Button>
+                                            </Typography>                                        </>
                                     )}
                                 </Box>
                             </div>

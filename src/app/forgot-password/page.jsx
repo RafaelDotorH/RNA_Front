@@ -1,4 +1,3 @@
-// src/app/forgot-password/page.jsx
 'use client'
 import React, { useState } from 'react';
 import TextField from '@mui/material/TextField';
@@ -7,7 +6,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Email } from '@mui/icons-material'; // Icono de Email
+import { Email } from '@mui/icons-material';
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { sendPasswordResetEmail, fetchSignInMethodsForEmail  } from 'firebase/auth';

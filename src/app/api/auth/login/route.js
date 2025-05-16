@@ -3,17 +3,17 @@ import jwt from 'jsonwebtoken';
 
 export async function POST(req) {
 
-    const { username, idToken } = await req.json();
+    const { email, idToken } = await req.json();
 
     try {
         
         const token = jwt.sign(
-            { userId: idToken, username: username },
-            process.env.JWT_SECRET, // Asegúrate de tener esta variable de entorno definida
-            { expiresIn: '1h' } // O el tiempo de expiración que desees
+            { userId: idToken, email: email },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
         );
 
-        return new Response(JSON.stringify({ message: 'Inicio de sesión exitoso', token }), { // Devuelve el token en la respuesta JSON *y* en la cookie
+        return new Response(JSON.stringify({ message: 'Inicio de sesión exitoso. Redirigiendo...', token }), { // Devuelve el token en la respuesta JSON *y* en la cookie
             status: 200,
             headers: {
                 'Set-Cookie': `token=${token}; HttpOnly; Path=/; Max-Age=3600; Secure; SameSite=Strict`, // Mejoras en la cookie

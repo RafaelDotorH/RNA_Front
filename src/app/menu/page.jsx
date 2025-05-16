@@ -47,8 +47,8 @@ const Menu = () => {
                 ScrollTrigger.create({
                     trigger: section,
                     scroller: containerRef.current,
-                    start: "top center", // Ajusta según necesites
-                    end: "bottom center", // Ajusta según necesites
+                    start: "top center",
+                    end: "bottom center", 
                     onEnter: () => {
                         gsap.to(bodyRef.current, {
                             backgroundColor: bgColor,
@@ -69,7 +69,7 @@ const Menu = () => {
                           });
                         }
                     },
-                    // markers: true // Descomenta para ver los markers (opcional)
+                    // markers: true // Descomenta para ver los markers
                 });
             });
         }
