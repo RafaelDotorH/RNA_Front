@@ -3,12 +3,12 @@ import jwt from 'jsonwebtoken';
 
 export async function POST(req) {
 
-    const { email, idToken } = await req.json();
+    const { email , idToken } = await req.json();
 
     try {
         
         const token = jwt.sign(
-            { userId: idToken, email: email },
+            { userId: idToken, email }, 
             process.env.JWT_SECRET,
             { expiresIn: '1h' }
         );

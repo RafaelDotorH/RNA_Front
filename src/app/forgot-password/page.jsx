@@ -6,7 +6,7 @@ import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Email } from '@mui/icons-material';
+import { Email } from '@mui/icons-material'; // Icono de Email
 import InputAdornment from '@mui/material/InputAdornment';
 
 import { sendPasswordResetEmail, fetchSignInMethodsForEmail  } from 'firebase/auth';
@@ -33,18 +33,27 @@ function ForgotPasswordPage() {
         setIsLoading(true);
 
         try {
-            const signInMethods = await fetchSignInMethodsForEmail(auth, email);
+            console.log(`Verificando email en MongoDB: ${email}`);
+            const checkEmailResponse = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`);
+            const checkEmailData = await checkEmailResponse.json();
 
-            if (signInMethods.length === 0) {
-                setError('No se encontró ninguna cuenta con este correo electrónico.');
+            if (!checkEmailResponse.ok) {
+                throw new Error(checkEmailData.message || 'Error al verificar el correo en la base de datos.');
+            }
+
+            if (!checkEmailData.exists) {
+                console.log(`Email NO encontrado en MongoDB según la API: ${email}`);
+                setError('No se encontró ninguna cuenta registrada con este correo electrónico.');
                 setIsLoading(false);
                 return;
             }
 
+            console.log(`Email encontrado en MongoDB. Intentando enviar correo de restablecimiento con Firebase para: ${email}`);
             await sendPasswordResetEmail(auth, email);
-            setSuccessMessage('Se ha enviado un correo para restablecer tu contraseña. Revisa tu bandeja de entrada (y spam).');
-            setEmail(''); // Limpiar el campo de email
-            setTimeout(() => router.push('/login'), 5000);
+            // Mensaje de éxito
+            setSuccessMessage('Tu solicitud ha sido procesada. Recibirás un correo con instrucciones para restablecer tu contraseña en breve. Por favor, revisa tu bandeja de entrada y la carpeta de spam(correo no deseado).');
+            setEmail('');
+            setTimeout(() => router.push('/'), 5500);
         } catch (err) {
             console.error("Error en el proceso de restablecimiento:", err.code, err.message);
             let friendlyMessage = 'Error al intentar restablecer la contraseña.';
@@ -107,7 +116,7 @@ function ForgotPasswordPage() {
                     InputProps={{
                         startAdornment: (
                             <InputAdornment position="start">
-                                <Email /> {/* Estilo vía CSS o sx si prefieres */}
+                                <Email />
                             </InputAdornment>
                         ),
                     }}

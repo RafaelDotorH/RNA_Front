@@ -31,6 +31,7 @@ function LoginPage() {
     const [password, setPassword] = useState('');
     const [isLogin, setIsLogin] = useState(true);
     const [email, setEmail] = useState('');
+    const [emailLogin, setEmailLogin] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
     const [error, setError] = useState(''); //errores
     const [successMessage, setSuccessMessage] = useState(''); // messages de estatus
@@ -57,19 +58,16 @@ function LoginPage() {
                 return;
             }
             try {
-                const userCredential = await signInWithEmailAndPassword(auth, email, password);
+                // Autenticación con Firebase
+                const userCredential = await signInWithEmailAndPassword(auth, email, password); // Correcto, usa el estado 'email'
                 const user = userCredential.user;
-                console.log('Usuario inició sesión con Firebase:', user);
 
                 if (user.emailVerified) {
-
                     const idToken = await user.getIdToken(true);
                     const apiResponse = await fetch('/api/auth/login', {
                         method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ email, idToken }),
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ username, idToken }), // Correcto, envía el estado 'email'
                     });
 
                     const apiData = await apiResponse.json();
@@ -100,6 +98,10 @@ function LoginPage() {
             // --- Lógica de Registro con Firebase ---
             if (!username || !email || !password || !confirmPassword) {
                 setError("Por favor, completa todos los campos para registrarte.");
+                return;
+            }
+            if (email !== emailLogin) {
+                setError("Los correos electrónicos no coinciden.");
                 return;
             }
             if (password !== confirmPassword) {
@@ -192,12 +194,31 @@ function LoginPage() {
                                 )}
 
 
+                                 {!isLogin && (
                                 <TextField
                                     label="Correo Electrónico"
                                     variant="outlined"
                                     margin="normal"
                                     fullWidth
                                     type="email"
+                                    value={emailLogin}
+                                    onChange={(e) => setEmailLogin(e.target.value)}
+                                    InputProps={{
+                                        startAdornment: (
+                                            <InputAdornment position='start'>
+                                                <Email />
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                    required
+                                />
+                                 )}
+
+                                <TextField
+                                    label={isLogin ? "Correo Electrónico" : "Confirmar Correo Electrónico"}
+                                    variant="outlined"
+                                    margin="normal"
+                                    fullWidth
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     InputProps={{
@@ -207,7 +228,7 @@ function LoginPage() {
                                             </InputAdornment>
                                         ),
                                     }}
-                                    required={isLogin}
+                                    required = {isLogin}
                                 />
 
 
