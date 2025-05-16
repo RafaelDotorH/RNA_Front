@@ -1,45 +1,19 @@
 import { NextResponse } from 'next/server';
-import dbConnect from '@/app/lib/mongodb';
-import User from '@/app/models/User'; // Asegúrate de que el nombre del modelo sea correcto
 import jwt from 'jsonwebtoken';
-import bcrypt from 'bcryptjs'; // Ya deberías tener bcryptjs en tu package.json
 
 export async function POST(req) {
-    await dbConnect();
 
-    const { username, password } = await req.json();
+    const { email, idToken } = await req.json();
 
     try {
-        if (!username || !password) {
-            return NextResponse.json({ message: 'Usuario y contraseña son obligatorios' }, { status: 400 });
-        }
-
-        const user = await User.findOne({ username });
-        console.log("Usuario encontrado:", user);  // Descomenta para depurar si es necesario
-
-        if (!user) {
-            return NextResponse.json({ message: 'Usuario o contraseña incorrecta' }, { status: 401 }); // Mensaje unificado
-        }
-
-        if (!user.passwordHash) {
-            return NextResponse.json({ message: 'Error interno del servidor (contraseña no encontrada)' }, { status: 500 });
-        }
-
-
-        const isPasswordValid = await bcrypt.compare(password, user.passwordHash); // Solo una comparación
-
-        console.log("resultado de comparacion ",isPasswordValid) // Descomenta para depurar si es necesario
-
-        if (!isPasswordValid) {
-            return NextResponse.json({ message: 'Usuario o contraseña incorrecta' }, { status: 401 }); // Mensaje unificado
-        }
+        
         const token = jwt.sign(
-            { userId: user._id, username: user.username },
-            process.env.JWT_SECRET, // Asegúrate de tener esta variable de entorno definida
-            { expiresIn: '1h' } // O el tiempo de expiración que desees
+            { userId: idToken, email: email },
+            process.env.JWT_SECRET,
+            { expiresIn: '1h' }
         );
 
-        return new Response(JSON.stringify({ message: 'Inicio de sesión exitoso', token }), { // Devuelve el token en la respuesta JSON *y* en la cookie
+        return new Response(JSON.stringify({ message: 'Inicio de sesión exitoso. Redirigiendo...', token }), { // Devuelve el token en la respuesta JSON *y* en la cookie
             status: 200,
             headers: {
                 'Set-Cookie': `token=${token}; HttpOnly; Path=/; Max-Age=3600; Secure; SameSite=Strict`, // Mejoras en la cookie
