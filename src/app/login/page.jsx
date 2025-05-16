@@ -67,7 +67,7 @@ function LoginPage() {
                     const apiResponse = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ username, idToken }), // Correcto, envía el estado 'email'
+                        body: JSON.stringify({ email, idToken }), // Correcto, envía el estado 'email'
                     });
 
                     const apiData = await apiResponse.json();
