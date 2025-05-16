@@ -5,7 +5,7 @@ import jwt from 'jsonwebtoken';
 import dbConnect from '@/app/lib/mongodb'; // Ajusta la ruta si es necesario
 import UserModel from '@/app/models/User';   // Ajusta la ruta si es necesario
 
-export async function GET(req) {
+export async function GET() {
     try {
         await dbConnect();
     } catch (dbError) {
