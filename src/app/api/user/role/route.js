@@ -2,8 +2,8 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import jwt from 'jsonwebtoken';
-import dbConnect from '@/app/lib/mongodb'; // Ajusta la ruta si es necesario
-import UserModel from '@/app/models/User';   // Ajusta la ruta si es necesario
+import dbConnect from '@/app/lib/mongodb';
+import UserModel from '@/app/models/User';
 
 export async function GET() {
     try {
@@ -20,7 +20,7 @@ export async function GET() {
 
     try {
         const cookieStore = cookies();
-        const tokenCookie = cookieStore.get('token'); // Lee la cookie 'token'
+        const tokenCookie = cookieStore.get('token');
 
         if (!tokenCookie) {
             console.log('[API /api/user/role] No se encontró la cookie "token".');
