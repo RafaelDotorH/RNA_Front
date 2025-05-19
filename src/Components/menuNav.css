@@ -214,13 +214,16 @@ select {
 #navbar {
     top: 0;
     padding: 0;
-    width: 5em;
+    width: 5em; /* Ancho colapsado */
     height: 100vh;
-    position: fixed;
+    position: fixed; /* CORRECTO para una barra lateral fija */
     background-color: hsl(var(--background-secondary));
     transition: width .35s cubic-bezier(var(--transition-main), 1);
     overflow-y: auto;
     overflow-x: hidden;
+    /* AÑADE ESTO: */
+    left: 0; /* Asegura que esté pegada a la izquierda */
+    z-index: 1000;
 }
 #navbar:hover {
     width: 16em;
