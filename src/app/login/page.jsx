@@ -1,4 +1,3 @@
-// src/app/login/page.jsx
 'use client'
 import React, { useState, useCallback } from 'react';
 import TextField from '@mui/material/TextField';
@@ -8,15 +7,15 @@ import PersonOutline from '@mui/icons-material/PersonOutline';
 import LockOutlined from '@mui/icons-material/LockOutlined';
 import Visibility from '@mui/icons-material/Visibility';
 import VisibilityOff from '@mui/icons-material/VisibilityOff';
-import { Email, MarkEmailReadOutlined, HourglassEmptyOutlined } from '@mui/icons-material'; // Iconos adicionales
+import { Email } from '@mui/icons-material';
 import Button from '@mui/material/Button';
 import Box from '@mui/material/Box';
 import Typography from '@mui/material/Typography';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import CircularProgress from '@mui/material/CircularProgress';
 import '../CSS/login.css';
 
-// Importaciones de Firebase
 import {
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
@@ -33,8 +32,9 @@ function LoginPage() {
     const [email, setEmail] = useState('');
     const [emailLogin, setEmailLogin] = useState('');
     const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState(''); //errores
-    const [successMessage, setSuccessMessage] = useState(''); // messages de estatus
+    const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState('');
+    const [isLoading, setIsLoading] = useState(false);
     const router = useRouter();
 
     const handleClickShowPassword = useCallback(() => {
@@ -50,16 +50,16 @@ function LoginPage() {
         event.preventDefault();
         setError('');
         setSuccessMessage('');
+        setIsLoading(true);
 
         if (isLogin) {
-            // --- Lógica de Inicio de Sesión con Firebase ---
             if (!email || !password) {
                 setError("Por favor, ingresa tu correo y contraseña.");
+                setIsLoading(false);
                 return;
             }
             try {
-                // Autenticación con Firebase
-                const userCredential = await signInWithEmailAndPassword(auth, email, password); // Correcto, usa el estado 'email'
+                const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
                 if (user.emailVerified) {
@@ -67,7 +67,7 @@ function LoginPage() {
                     const apiResponse = await fetch('/api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({ email, idToken }), // Correcto, envía el estado 'email'
+                        body: JSON.stringify({ email, idToken }),
                     });
 
                     const apiData = await apiResponse.json();
@@ -93,19 +93,23 @@ function LoginPage() {
                     friendlyMessage = 'Demasiados intentos fallidos. Intenta más tarde o recupera tu contraseña.';
                 }
                 setError(friendlyMessage);
+            } finally {
+                setIsLoading(false);
             }
         } else {
-            // --- Lógica de Registro con Firebase ---
             if (!username || !email || !password || !confirmPassword) {
                 setError("Por favor, completa todos los campos para registrarte.");
+                setIsLoading(false);
                 return;
             }
             if (email !== emailLogin) {
                 setError("Los correos electrónicos no coinciden.");
+                setIsLoading(false);
                 return;
             }
             if (password !== confirmPassword) {
                 setError("Las contraseñas no coinciden.");
+                setIsLoading(false);
                 return;
             }
             try {
@@ -133,6 +137,7 @@ function LoginPage() {
                     setConfirmPassword('');
                 } else {
                     console.log(apiDataMongo.message || 'Error del servidor al procesar el registro.');
+                    setError(apiDataMongo.message || 'Error del servidor al procesar el registro.');
                 }
 
             } catch (err) {
@@ -146,6 +151,8 @@ function LoginPage() {
                     friendlyMessage = 'La contraseña es demasiado débil. Debe tener al menos 6 caracteres.';
                 }
                 setError(friendlyMessage);
+            } finally {
+                setIsLoading(false);
             }
         }
     };
@@ -157,12 +164,14 @@ function LoginPage() {
         setPassword('');
         setEmail('');
         setConfirmPassword('');
+        setEmailLogin('');
     };
 
 
     return (
         <Box className="my-component">
-            <form onSubmit={handleSubmit} className="card-3d-wrap">
+            {/* Aplicar la clase condicional aquí */}
+            <form onSubmit={handleSubmit} className={`card-3d-wrap ${!isLogin ? 'register-active' : ''}`}>
                 <div className="card-3d-wrapper">
                     <div className="card-front">
                         <div className="center-wrap">
@@ -190,6 +199,7 @@ function LoginPage() {
                                             ),
                                         }}
                                         required
+                                        disabled={isLoading}
                                     />
                                 )}
 
@@ -211,6 +221,7 @@ function LoginPage() {
                                         ),
                                     }}
                                     required
+                                    disabled={isLoading}
                                 />
                                  )}
 
@@ -219,6 +230,7 @@ function LoginPage() {
                                     variant="outlined"
                                     margin="normal"
                                     fullWidth
+                                    type="email"
                                     value={email}
                                     onChange={(e) => setEmail(e.target.value)}
                                     InputProps={{
@@ -228,7 +240,8 @@ function LoginPage() {
                                             </InputAdornment>
                                         ),
                                     }}
-                                    required = {isLogin}
+                                    required
+                                    disabled={isLoading}
                                 />
 
 
@@ -253,6 +266,7 @@ function LoginPage() {
                                                     onClick={handleClickShowPassword}
                                                     onMouseDown={handleMouseDownPassword}
                                                     edge="end"
+                                                    disabled={isLoading}
                                                 >
                                                     {showPassword ? <VisibilityOff /> : <Visibility />}
                                                 </IconButton>
@@ -260,6 +274,7 @@ function LoginPage() {
                                         ),
                                     }}
                                     required
+                                    disabled={isLoading}
                                 />
 
                                 {!isLogin && (
@@ -283,6 +298,7 @@ function LoginPage() {
                                                         onClick={handleClickShowPassword}
                                                         onMouseDown={handleMouseDownPassword}
                                                         edge="end"
+                                                        disabled={isLoading}
                                                     >
                                                         {showPassword ? <VisibilityOff /> : <Visibility />}
                                                     </IconButton>
@@ -290,6 +306,7 @@ function LoginPage() {
                                             ),
                                         }}
                                         required
+                                        disabled={isLoading}
                                     />
                                 )}
                                 <Button
@@ -297,8 +314,13 @@ function LoginPage() {
                                     variant="contained"
                                     fullWidth
                                     className='btn'
+                                    disabled={isLoading}
                                 >
-                                    {isLogin ? 'Iniciar Sesión' : 'Crear Cuenta y Verificar'}
+                                    {isLoading ? (
+                                        <CircularProgress size={24} sx={{ color: 'white' }} />
+                                    ) : (
+                                        isLogin ? 'Iniciar Sesión' : 'Crear Cuenta y Verificar'
+                                    )}
                                 </Button>
 
                                 <Box mt={1} textAlign="center">
@@ -308,6 +330,7 @@ function LoginPage() {
                                                 <Button
                                                     variant="text"
                                                     onClick={toggleMode}
+                                                    disabled={isLoading}
                                                 >
                                                     ¿No tienes una cuenta?{' '}Regístrate
                                                 </Button>
@@ -317,6 +340,7 @@ function LoginPage() {
                                                 <Link href="/forgot-password" passHref>
                                                     <Button
                                                         variant="text"
+                                                        disabled={isLoading}
                                                     >
                                                         ¿Olvidaste tu contraseña?
                                                     </Button>
@@ -329,6 +353,7 @@ function LoginPage() {
                                                 <Button
                                                     variant="text"
                                                     onClick={toggleMode}
+                                                    disabled={isLoading}
                                                 >
                                                     ¿Ya tienes una cuenta?{' '}Inicia Sesión
                                                 </Button>
