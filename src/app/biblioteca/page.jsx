@@ -1,5 +1,7 @@
 "use client"
 import React, { useState, useEffect, useCallback } from 'react';
+import { useRouter } from 'next/navigation';
+import { useAuth } from '@/app/lib/authContext';
 import MenuNav from '@/Components/menuNav';
 import Fooder from '@/Components/fooder';
 import { Document, Page, pdfjs } from 'react-pdf';
@@ -9,6 +11,9 @@ import 'react-pdf/dist/esm/Page/TextLayer.css';
 pdfjs.GlobalWorkerOptions.workerSrc = `/js/pdf.worker.min.mjs`;
 
 const Biblioteca = () => {
+    const { user, loading: authLoading, theme } = useAuth();
+    const router = useRouter();
+    
     const [articulos, setArticulos] = useState([]);
     const [busqueda, setBusqueda] = useState('');
     const [archivo, setArchivo] = useState(null);
@@ -18,6 +23,15 @@ const Biblioteca = () => {
     const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
     const [numPages, setNumPages] = useState(null);
     const [autoPreviewLoaded, setAutoPreviewLoaded] = useState(false);
+
+    useEffect(() => {
+            if (!authLoading && !user) {
+                router.push('/login');
+            }
+            else if (authLoading) {
+                router.push('/menu');
+            }
+        }, [authLoading, user, router]);
 
     const fetchArticulos = useCallback(async () => {
         setIsLoading(true);
@@ -37,8 +51,8 @@ const Biblioteca = () => {
                     a.name.toLowerCase().includes(busqueda.toLowerCase())
                 );
                 if (busqueda === '' || (articulosFiltradosCurrent.length > 0 && articulosFiltradosCurrent[0]._id === fetchedArticulos[0]._id) ) {
-                     handlePreview(fetchedArticulos[0].downloadURL);
-                     setAutoPreviewLoaded(true);
+                    handlePreview(fetchedArticulos[0].downloadURL);
+                    setAutoPreviewLoaded(true);
                 }
             } else if (fetchedArticulos.length === 0) {
                 setSelectedPdfUrl(null);
@@ -54,8 +68,10 @@ const Biblioteca = () => {
     }, [autoPreviewLoaded, busqueda]);
 
     useEffect(() => {
-        fetchArticulos();
-    }, [fetchArticulos]);
+        if (user) {
+            fetchArticulos();
+        }
+    }, [fetchArticulos, user]);
 
     const handleBuscar = (e) => {
         const nuevaBusqueda = e.target.value;
@@ -113,20 +129,11 @@ const Biblioteca = () => {
 
     const articulosFiltrados = React.useMemo(() => {
         if (!Array.isArray(articulos)) return [];
-        const filtrados = articulos.filter((articulo) =>
+        return articulos.filter((articulo) =>
             articulo && articulo.name && typeof articulo.name === 'string' &&
             articulo.name.toLowerCase().includes(busqueda.toLowerCase())
         );
-        if (filtrados.length > 0 && !selectedPdfUrl && !autoPreviewLoaded && busqueda !== '') {
-            setTimeout(() => {
-                handlePreview(filtrados[0].downloadURL);
-                setAutoPreviewLoaded(true);
-            }, 0);
-        } else if (filtrados.length === 0 && busqueda !== '') {
-             // setSelectedPdfUrl(null); // Comentado para evitar que se limpie si la búsqueda es muy rápida
-        }
-        return filtrados;
-    }, [articulos, busqueda, selectedPdfUrl, autoPreviewLoaded]);
+    }, [articulos, busqueda]);
 
     const handlePreview = (downloadUrl) => {
         setSelectedPdfUrl(downloadUrl);
@@ -137,12 +144,29 @@ const Biblioteca = () => {
         setNumPages(nextNumPages);
     }
 
-    // Memoizar las opciones para el componente Document
     const documentOptions = React.useMemo(() => ({
         cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
         cMapPacked: true,
     }), []);
 
+    if (authLoading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                backgroundColor: theme ? theme.appBackgroundColor : '#fff',
+                color: theme ? theme.appTextColor : '#000'
+            }}>
+                <h1>Verificando sesión...</h1>
+            </div>
+        );
+    }
+
+    if (!user) {
+        return null;
+    }
 
     return (
         <>
@@ -227,13 +251,13 @@ const Biblioteca = () => {
                                     }}
                                     loading="Cargando previsualización del PDF..."
                                     error="No se pudo cargar la vista previa del PDF."
-                                    options={documentOptions} // Usar las opciones memoizadas
+                                    options={documentOptions}
                                 >
                                     {Array.from(new Array(numPages || 0), (el, index) => (
                                         <Page
                                             key={`page_${index + 1}`}
                                             pageNumber={index + 1}
-                                            width={Math.max(document.querySelector('.col-md-4')?.getBoundingClientRect().width * 0.9, 250) || 300}
+                                            width={document.querySelector('.col-md-4')?.getBoundingClientRect().width ? Math.max(document.querySelector('.col-md-4').getBoundingClientRect().width * 0.9, 250) : 300}
                                             renderTextLayer={true}
                                             renderAnnotationLayer={true}
                                         />

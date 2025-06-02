@@ -58,11 +58,14 @@ export const AuthProvider = ({ children }) => {
     }, [userRole]);
 
     const logout = async () => {
-        try {
-            await signOut(auth);
+         try {
+            await fetch('/api/auth/logout', { method: 'POST' });
         } catch (error) {
-            console.error("Error al cerrar sesión:", error);
+            console.error("Error al llamar a /api/auth/logout en contexto", error);
         }
+        setUser(null); setIsAuthenticated(false); setTheme(getThemeForRole('default')); // Actualizar tema de la app
+        sessionStorage.removeItem('rnaAppLandedOnMenu');
+        setLoading(false);
     };
 
     const value = {

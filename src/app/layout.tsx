@@ -36,7 +36,6 @@ function ThemeApplicator({ children }: { children: React.ReactNode }) {
   if (loading && isClient && loadingRoutes.includes(pathname)) {
     return (
       <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f0f0f0' }}>
-        Cargando aplicación...
       </div>
     );
   }
