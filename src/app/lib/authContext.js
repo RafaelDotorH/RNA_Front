@@ -1,7 +1,7 @@
 "use client"
 import React, { createContext, useState, useEffect, useContext } from 'react';
 import { useRouter, usePathname } from 'next/navigation';
-import { getThemeForRole } from '../CSS/dynamicStyles'; // Ajusta esta ruta
+import { getThemeForRole } from '../CSS/dynamicStyles';
 
 export const AuthContext = createContext();
 
@@ -37,6 +37,7 @@ export const AuthProvider = ({ children }) => {
                     setAppTheme(getThemeForRole('default'));
                 }
             } catch (error) {
+                printf("Error al verificar la sesión del usuario:", error);
                 setUser(null);
                 setIsAuthenticated(false);
                 setAppTheme(getThemeForRole('default'));
