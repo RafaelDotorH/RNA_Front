@@ -25,10 +25,7 @@ const Biblioteca = () => {
     const [autoPreviewLoaded, setAutoPreviewLoaded] = useState(false);
 
     useEffect(() => {
-            if (!authLoading && !user) {
-                router.push('/login');
-            }
-            else if (authLoading) {
+            if (authLoading) {
                 router.push('/menu');
             }
         }, [authLoading, user, router]);
