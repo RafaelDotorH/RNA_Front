@@ -1,7 +1,7 @@
 "use client"
 import React from 'react';
-import MenuNav from '../../Components/menuNav';
-import Fooder from '../../Components/fooder';
+import MenuNav from '@/Components/menuNav';
+import Fooder from '@/Components/fooder';
 
 
 const Nosotros = () => {

@@ -1,7 +1,7 @@
 "use client"
 import React, { useState, useEffect, useCallback } from 'react';
-import MenuNav from '../../Components/menuNav';
-import Fooder from '../../Components/fooder';
+import MenuNav from '@/Components/menuNav';
+import Fooder from '@/Components/fooder';
 import { Document, Page, pdfjs } from 'react-pdf';
 import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
 import 'react-pdf/dist/esm/Page/TextLayer.css';
