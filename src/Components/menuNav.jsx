@@ -1,28 +1,34 @@
 'use client'
 import Link from 'next/link';
-import './menuNav.css'; // Importar los estilos CSS dedicados
+import './menuNav.css';
 import { IonIcon } from '@ionic/react';
 import { homeOutline, logOutOutline, libraryOutline, settingsOutline, informationOutline, menuOutline, closeOutline } from 'ionicons/icons';
 import React, { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import { useAuth } from '@/app/lib/authContext'; 
+import { useAuth } from '@/app/lib/authContext';
 
 export default function MenuNav() {
-    const router = useRouter(); //
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); //
-    const navRef = useRef(null); //
-    const { logout, isAuthenticated } = useAuth(); // Solo se usa para el estado de autenticación y la función de logout
+    const router = useRouter();
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const navRef = useRef(null);
+    const { logout } = useAuth();
 
-    const toggleMobileMenu = () => { //
+    const [isClient, setIsClient] = useState(false);
+
+    useEffect(() => {
+        setIsClient(true);
+    }, []);
+
+    const toggleMobileMenu = () => {
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
-    async function handleSignOut() { //
+    async function handleSignOut() {
         await logout();
-        setIsMobileMenuOpen(false); //
+        setIsMobileMenuOpen(false);
     }
 
-    useEffect(() => { //
+    useEffect(() => {
         function handleClickOutside(event) {
             if (navRef.current && !navRef.current.contains(event.target) && isMobileMenuOpen) {
                 const menuButton = document.getElementById('mobile-menu-button');
@@ -43,19 +49,16 @@ export default function MenuNav() {
         };
     }, [isMobileMenuOpen, navRef]);
 
-    const handleLinkClick = () => { //
+    const handleLinkClick = () => {
         setIsMobileMenuOpen(false);
     };
 
-
     return (
         <>
-            {/* Los estilos para este botón vendrán de menuNav.css o inline si son muy específicos y no temáticos */}
             <button id="mobile-menu-button" className="mobile-menu-button" onClick={toggleMobileMenu}>
-                <IonIcon icon={isMobileMenuOpen ? closeOutline : menuOutline} />
+                {isClient && <IonIcon icon={isMobileMenuOpen ? closeOutline : menuOutline} />}
             </button>
 
-            {/* Los estilos para nav y sus hijos vendrán de menuNav.css */}
             <nav id="navbar" ref={navRef} className={isMobileMenuOpen ? 'mobile-menu-active' : ''}>
                 <ul className="navbar-items">
                     <li className="navbar-logo flexbox-left">
@@ -65,7 +68,7 @@ export default function MenuNav() {
                     <li className="navbar-item flexbox-left">
                         <Link href="/menu" className="navbar-item-inner flexbox-left" onClick={handleLinkClick}>
                             <div className="navbar-item-inner-icon-wrapper flexbox">
-                                <IonIcon icon={homeOutline} />
+                                {isClient && <IonIcon icon={homeOutline} />}
                             </div>
                             <span className="link-text">Inicio</span>
                         </Link>
@@ -73,7 +76,7 @@ export default function MenuNav() {
                     <li className="navbar-item flexbox-left">
                         <Link href="/biblioteca" className="navbar-item-inner flexbox-left" onClick={handleLinkClick}>
                             <div className="navbar-item-inner-icon-wrapper flexbox">
-                                <IonIcon icon={libraryOutline} />
+                                {isClient && <IonIcon icon={libraryOutline} />}
                             </div>
                             <span className="link-text">Biblioteca</span>
                         </Link>
@@ -81,7 +84,7 @@ export default function MenuNav() {
                     <li className="navbar-item flexbox-left">
                         <Link href="/principal" className="navbar-item-inner flexbox-left" onClick={handleLinkClick}>
                             <div className="navbar-item-inner-icon-wrapper flexbox">
-                                <IonIcon icon={settingsOutline} />
+                                {isClient && <IonIcon icon={settingsOutline} />}
                             </div>
                             <span className="link-text">Evaluador</span>
                         </Link>
@@ -89,18 +92,18 @@ export default function MenuNav() {
                     <li className="navbar-item flexbox-left">
                         <Link href="/nosotros" className="navbar-item-inner flexbox-left" onClick={handleLinkClick}>
                             <div className="navbar-item-inner-icon-wrapper flexbox">
-                                <IonIcon icon={informationOutline} />
+                                {isClient && <IonIcon icon={informationOutline} />}
                             </div>
                             <span className="link-text">Nosotros</span>
                         </Link>
                     </li>
-                    <li className="navbar-item mobile-only-separator"></li> {/* Estilo desde CSS */}
+                    <li className="navbar-item mobile-only-separator"></li>
                         <Link href="/" className="navbar-item flexbox-left" onClick={handleSignOut}>
                             <div className="navbar-item-inner flexbox-left" style={{cursor: 'pointer'}}>
-                                 <div className="navbar-item-inner-icon-wrapper flexbox">
-                                    <IonIcon icon={logOutOutline} />
-                                </div>
-                                <span className="link-text">Cerrar Sesión</span>
+                                    <div className="navbar-item-inner-icon-wrapper flexbox">
+                                        {isClient && <IonIcon icon={logOutOutline} />}
+                                    </div>
+                                    <span className="link-text">Cerrar Sesión</span>
                             </div>
                         </Link>
                 </ul>
