@@ -17,10 +17,7 @@ const PrincipalPage = () => {
     const [image, setImage] = useState(null);
 
     useEffect(() => {
-        if (!loading && !user) {
-            router.push('/login');
-        }
-        else if (loading) {
+        if (loading) {
             router.push('/menu');
         }
     }, [loading, user, router]);

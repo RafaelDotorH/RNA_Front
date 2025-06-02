@@ -12,10 +12,7 @@ const Nosotros = () => {
     const router = useRouter();
 
     useEffect(() => {
-            if (!loading && !user) {
-                router.push('/login');
-            }
-            else if (loading) {
+            if (loading) {
                 router.push('/menu');
             }
         }, [loading, user, router]);
