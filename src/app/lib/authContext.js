@@ -63,7 +63,8 @@ export const AuthProvider = ({ children }) => {
         } catch (error) {
             console.error("Error al llamar a /api/auth/logout en contexto", error);
         }
-        setUser(null); setIsAuthenticated(false); setTheme(getThemeForRole('default')); // Actualizar tema de la app
+        setUser(null); 
+        setTheme(getThemeForRole('default')); // Actualizar tema de la app
         sessionStorage.removeItem('rnaAppLandedOnMenu');
         setLoading(false);
     };

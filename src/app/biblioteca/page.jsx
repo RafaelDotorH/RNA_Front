@@ -159,7 +159,7 @@ const Biblioteca = () => {
                 backgroundColor: theme ? theme.appBackgroundColor : '#fff',
                 color: theme ? theme.appTextColor : '#000'
             }}>
-                <h1>Verificando sesión...</h1>
+                <h1>Cargando...</h1>
             </div>
         );
     }
