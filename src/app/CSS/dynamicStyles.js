@@ -1,4 +1,3 @@
-// src/styles/dynamicStyles.js
 const baseColors = {
   white: '#FFFFFF',
   black: '#000000',
@@ -15,15 +14,12 @@ const baseColors = {
 const roleStyles = {
   cliente: {
     theme: {
-      // Colores generales de la aplicación
       appBackgroundColor: baseColors.white,
       appTextColor: baseColors.darkGray,
       appPrimaryColor: baseColors.primaryBlue,
       appSecondaryColor: baseColors.infoCyan,
-      // Colores específicos para botones generales (si los necesitas fuera de nav/footer)
       buttonBackground: baseColors.primaryBlue,
       buttonText: baseColors.white,
-      // ... otros estilos generales que quieras cambiar
     },
   },
   moderador: {

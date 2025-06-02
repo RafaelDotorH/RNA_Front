@@ -1,136 +1,86 @@
-"use client"
-import React, { createContext, useState, useEffect, useContext } from 'react';
-import { useRouter, usePathname } from 'next/navigation';
-import { getThemeForRole } from '../CSS/dynamicStyles';
+'use client';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
+import { app } from '@/app/lib/firebasedb';
+import { getThemeForRole } from '@/app/CSS/dynamicStyles';
 
-export const AuthContext = createContext();
+const auth = getAuth(app);
+const AuthContext = createContext();
 
 export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [isAuthenticated, setIsAuthenticated] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [appTheme, setAppTheme] = useState(getThemeForRole('default')); // Renombrado a appTheme
-    const router = useRouter();
-    const pathname = usePathname();
+    const [userRole, setUserRole] = useState('default');
+    const [theme, setTheme] = useState(getThemeForRole('default'));
+    const [isLoadingRole, setIsLoadingRole] = useState(true);
 
     useEffect(() => {
-        const verifySession = async () => {
-            try {
-                const response = await fetch('/api/user/role');
-                if (response.ok) {
-                    const data = await response.json();
-                    if (data.exists && data.role) {
-                        const currentUser = { email: data.email, role: data.role };
-                        setUser(currentUser);
-                        setIsAuthenticated(true);
-                        setAppTheme(getThemeForRole(data.role)); // Establecer tema de la app
-                    } else {
-                        setUser(null);
-                        setIsAuthenticated(false);
-                        setAppTheme(getThemeForRole('default'));
-                    }
-                } else {
-                    setUser(null);
-                    setIsAuthenticated(false);
-                    setAppTheme(getThemeForRole('default'));
-                }
-            } catch (error) {
-                printf("Error al verificar la sesión del usuario:", error);
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser(user);
+            } else {
                 setUser(null);
-                setIsAuthenticated(false);
-                setAppTheme(getThemeForRole('default'));
-            } finally {
-                setLoading(false);
+                setUserRole('default');
             }
-        };
-        verifySession();
+            setLoading(false);
+        });
+        return () => unsubscribe();
     }, []);
 
     useEffect(() => {
-        if (user && user.role) {
-            setAppTheme(getThemeForRole(user.role));
-        } else {
-            setAppTheme(getThemeForRole('default'));
-        }
+        const fetchUserRole = async () => {
+            if (!user) {
+                setIsLoadingRole(false);
+                return;
+            }
+            setIsLoadingRole(true);
+            try {
+                const response = await fetch('/api/user/role');
+                const data = await response.json();
+                if (response.ok && data.role) {
+                    setUserRole(data.role);
+                } else {
+                    setUserRole('cliente');
+                }
+            } catch (error) {
+                console.error("Error al obtener el rol del usuario:", error);
+                setUserRole('cliente');
+            } finally {
+                setIsLoadingRole(false);
+            }
+        };
+        fetchUserRole();
     }, [user]);
 
     useEffect(() => {
-        if (typeof window !== 'undefined' && !loading) {
-            const isAppLandedOnMenu = sessionStorage.getItem('rnaAppLandedOnMenu') === 'true';
-            const isNavigationTargetPage = ["/principal", "/nosotros", "/biblioteca"].includes(pathname);
-            const isMenuPage = pathname === "/menu";
-            const isLoginPage = pathname === '/' || pathname === '/login';
+        setTheme(getThemeForRole(userRole));
+    }, [userRole]);
 
-            if (isMenuPage) {
-                sessionStorage.setItem('rnaAppLandedOnMenu', 'true');
-            } else if (isNavigationTargetPage && !isAppLandedOnMenu) {
-                 router.replace('/menu');
-            }
-
-            if (isLoginPage) {
-                 sessionStorage.removeItem('rnaAppLandedOnMenu');
-            }
-        }
-    }, [pathname, loading, router]);
-
-    const loginContext = async (email, firebaseIdToken) => {
-        setLoading(true);
-        try {
-            const apiResponse = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, idToken: firebaseIdToken }),
-            });
-
-            if (!apiResponse.ok) {
-                const errorData = await apiResponse.json();
-                setLoading(false);
-                throw new Error(errorData.message || 'Error al iniciar sesión en API de login');
-            }
-
-            const userRoleResponse = await fetch('/api/user/role');
-            if (userRoleResponse.ok) {
-                const userData = await userRoleResponse.json();
-                if (userData.exists && userData.role) {
-                    const currentUser = { email: userData.email, role: userData.role };
-                    setUser(currentUser);
-                    setIsAuthenticated(true);
-                    setAppTheme(getThemeForRole(currentUser.role)); // Actualizar tema de la app
-                    sessionStorage.setItem('rnaAppLandedOnMenu', 'true');
-                    router.push('/menu');
-                    setLoading(false);
-                    return { success: true };
-                }
-            }
-            setIsAuthenticated(false); setLoading(false); throw new Error("No se pudo verificar la sesión del usuario después del login.");
-        } catch (error) {
-            setUser(null); setIsAuthenticated(false); setAppTheme(getThemeForRole('default')); setLoading(false);
-            return { success: false, error: error.message };
-        }
-    };
-
-    const logoutContext = async () => {
-        setLoading(true);
-        try {
+    const logout = async () => {
+         try {
             await fetch('/api/auth/logout', { method: 'POST' });
         } catch (error) {
             console.error("Error al llamar a /api/auth/logout en contexto", error);
         }
-        setUser(null); setIsAuthenticated(false); setAppTheme(getThemeForRole('default')); // Actualizar tema de la app
+        setUser(null); 
+        setTheme(getThemeForRole('default')); // Actualizar tema de la app
         sessionStorage.removeItem('rnaAppLandedOnMenu');
-        router.push('/');
         setLoading(false);
     };
 
-    if (loading && ["/menu", "/principal", "/nosotros", "/biblioteca"].includes(pathname)) {
-        return <div>Cargando aplicación...</div>;
+    const value = {
+        user,
+        loading: loading || isLoadingRole,
+        logout,
+        userRole,
+        theme,
+    };
+
+    if (!theme) {
+        return <div>Cargando tema...</div>;
     }
 
-    return (
-        <AuthContext.Provider value={{ user, isAuthenticated, loginContext, logoutContext, loading, appTheme }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
