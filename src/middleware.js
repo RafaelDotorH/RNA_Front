@@ -23,8 +23,7 @@ export async function middleware(request) {
                     return NextResponse.redirect(new URL('/menu', request.url));
                 }
             } catch (error) {
-                // El referer podría no ser una URL válida, ignoramos el error.
-                console.log("Invalid Referer URL.");
+                console.log("Invalid Referer URL.", error);
             }
         } else {
             // Si no hay referer, es una carga directa (nuevo tab, etc). Redirigimos.
@@ -32,31 +31,21 @@ export async function middleware(request) {
             return NextResponse.redirect(new URL('/menu', request.url));
         }
     }
-    // --- FIN DE LA LÓGICA DE REDIRECCIÓN ---
-
-
-    // --- LÓGICA DE AUTENTICACIÓN (EXISTENTE) ---
-    // Si el usuario intenta acceder a la página de login pero ya tiene un token válido,
-    // lo redirigimos al menú principal para evitar que inicie sesión de nuevo.
     if (pathname === '/login' || pathname === '/forgot-password') {
         if (token) {
             try {
                 await jwtVerify(token.value, secret);
-                // Token válido, redirigir al menú
                 return NextResponse.redirect(new URL('/menu', request.url));
             } catch (error) {
-                // Token no válido, permitir el acceso a login/forgot-password
+                console.error("Token verification failed on login/forgot-password:", error);
                 return NextResponse.next();
             }
         }
-        // Si no hay token, permitir el acceso a login/forgot-password
         return NextResponse.next();
     }
 
-    // Proteger todas las demás rutas si no hay token
     if (!token) {
-        // Redirigir a login si no hay token y no es una página pública
-        const publicPages = ['/', '/login', '/forgot-password']; // Añade otras páginas públicas si las tienes
+        const publicPages = ['/', '/login', '/forgot-password'];
         if (!publicPages.includes(pathname)) {
             return NextResponse.redirect(new URL('/login', request.url));
         }
@@ -68,7 +57,7 @@ export async function middleware(request) {
         await jwtVerify(token.value, secret);
         return NextResponse.next(); // El token es válido, continuar
     } catch (error) {
-        // El token no es válido o ha expirado, redirigir a login
+        console.error("Token verification failed:", error);
         const loginUrl = new URL('/login', request.url);
         // Opcional: añadir un mensaje de error o una redirección de origen
         loginUrl.searchParams.set('from', pathname);
@@ -79,19 +68,7 @@ export async function middleware(request) {
     }
 }
 
-// Configuración del Matcher para el middleware
 export const config = {
     matcher: [
-        /*
-         * Match all request paths except for the ones starting with:
-         * - api (API routes)
-         * - _next/static (static files)
-         * - _next/image (image optimization files)
-         * - favicon.ico (favicon file)
-         * - CSS
-         * - js
-         * - img
-         */
-        '/((?!api|_next/static|_next/image|favicon.ico|CSS|js|img).*)',
     ],
 };

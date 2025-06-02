@@ -3,7 +3,6 @@ import React, { useEffect, useRef, useState, useCallback } from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import gsap from 'gsap';
 import ScrollTrigger from 'gsap/ScrollTrigger';
-import LocomotiveScroll from 'locomotive-scroll';
 import MenuNav from '../../Components/menuNav';
 import Fooder from '../../Components/fooder';
 
@@ -12,11 +11,8 @@ gsap.registerPlugin(ScrollTrigger);
 const VistaCliente = () => (
     <>
         <section data-bgcolor="#bcb8ad" data-textcolor="#032f35" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
-
             <h1>Bienvenido Cliente</h1>
-
             <p>Contenido específico para clientes.</p>
-
         </section>
         <section data-bgcolor="#eacbd1" data-textcolor="#536fae" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
             <h2>Ofertas para Clientes</h2>
@@ -25,18 +21,12 @@ const VistaCliente = () => (
     </>
 );
 
-
-
 const VistaModerador = () => (
     <>
         <section data-bgcolor="#add8e6" data-textcolor="#00008b" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
-
             <h1>Panel de Moderador</h1>
-
             <p>Herramientas y contenido para moderadores.</p>
-
         </section>
-
         <section data-bgcolor="#90ee90" data-textcolor="#006400" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
             <h2>Contenido Pendiente de Revisión</h2>
             <p>Listado de items a moderar.</p>
@@ -44,17 +34,11 @@ const VistaModerador = () => (
     </>
 );
 
-
-
 const VistaAdministrador = () => (
-
     <>
         <section data-bgcolor="#ffd700" data-textcolor="#8b4513" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
-
             <h1>Panel de Administración</h1>
-
             <p>Gestión completa del sistema.</p>
-
         </section>
         <section data-bgcolor="#ffb6c1" data-textcolor="#800000" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
             <h2>Estadísticas y Usuarios</h2>
@@ -63,68 +47,25 @@ const VistaAdministrador = () => (
     </>
 );
 
-
-
 const Menu = () => {
-    const containerRef = useRef(null);
     const [userRole, setUserRole] = useState(null);
-    const scrollerRef = useRef(null);
 
     const initAnimations = useCallback(() => {
-
-        if (!containerRef.current) return;
-        if (scrollerRef.current) {
-            scrollerRef.current.destroy();
-
-        }
-
-
-        const scroller = new LocomotiveScroll({
-            el: containerRef.current,
-            smooth: true,
-            tablet: { smooth: false },
-            smartphone: { smooth: false },
-        });
-
-        scrollerRef.current = scroller;
-        scroller.on("scroll", ScrollTrigger.update);
-
-        ScrollTrigger.scrollerProxy(containerRef.current, {
-
-            scrollTop(value) {
-                return arguments.length
-                    ? scroller.scrollTo(value, { duration: 0, disableLerp: true })
-                    : scroller.scroll.instance.scroll.y;
-            },
-
-            getBoundingClientRect() {
-                return { top: 0, left: 0, width: window.innerWidth, height: window.innerHeight };
-            },
-
-        });
-
-        const sections = gsap.utils.toArray("section[data-bgcolor]", containerRef.current);
+        const sections = gsap.utils.toArray("section[data-bgcolor]");
+        
         sections.forEach(section => {
             const bgColor = section.dataset.bgcolor;
             const textColor = section.dataset.textcolor;
 
             ScrollTrigger.create({
                 trigger: section,
-                scroller: containerRef.current,
-                start: "top center",
-                end: "bottom center",
+                start: "top 50%",
+                end: "bottom 50%",
                 onEnter: () => gsap.to('body', { backgroundColor: bgColor, color: textColor, overwrite: "auto" }),
                 onEnterBack: () => gsap.to('body', { backgroundColor: bgColor, color: textColor, overwrite: "auto" }),
             });
-
         });
-
-        ScrollTrigger.addEventListener('refresh', () => scroller.update());
-        ScrollTrigger.refresh();
-
     }, []);
-
-
 
     useEffect(() => {
         const fetchUserRole = async () => {
@@ -141,24 +82,17 @@ const Menu = () => {
         fetchUserRole();
     }, []);
 
-
-
     useEffect(() => {
-
         if (userRole) {
-            initAnimations();
+            const timer = setTimeout(() => {
+                initAnimations();
+            }, 100);
+
+            return () => {
+                clearTimeout(timer);
+                ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+            };
         }
-
-        return () => {
-
-            if (scrollerRef.current) {
-                scrollerRef.current.destroy();
-                scrollerRef.current = null;
-            }
-
-            ScrollTrigger.getAll().forEach(trigger => trigger.kill());
-        };
-
     }, [userRole, initAnimations]);
 
     const renderContentByRole = () => {
@@ -180,13 +114,12 @@ const Menu = () => {
     return (
         <div>
             <MenuNav />
-            <div ref={containerRef}>
+            <main>
                 {renderContentByRole()}
-            </div>
+            </main>
             <Fooder />
         </div>
     );
-
 };
 
 export default Menu;

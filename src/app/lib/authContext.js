@@ -1,6 +1,6 @@
 'use client';
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { onAuthStateChanged, signOut, getAuth } from 'firebase/auth';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { app } from '@/app/lib/firebasedb';
 import { getThemeForRole } from '@/app/CSS/dynamicStyles';
 
@@ -45,6 +45,7 @@ export const AuthProvider = ({ children }) => {
                     setUserRole('cliente');
                 }
             } catch (error) {
+                console.error("Error al obtener el rol del usuario:", error);
                 setUserRole('cliente');
             } finally {
                 setIsLoadingRole(false);
