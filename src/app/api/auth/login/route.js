@@ -13,16 +13,16 @@ export async function POST(req) {
             { expiresIn: '1h' }
         );
 
-        return new Response(JSON.stringify({ message: 'Inicio de sesión exitoso. Redirigiendo...', token }), { // Devuelve el token en la respuesta JSON *y* en la cookie
+        return new Response(JSON.stringify({ message: 'Inicio de sesión exitoso. Redirigiendo...', token }), {
             status: 200,
             headers: {
-                'Set-Cookie': `token=${token}; HttpOnly; Path=/; Max-Age=3600; Secure; SameSite=Strict`, // Mejoras en la cookie
-                'Content-Type': 'application/json', // Especifica el tipo de contenido
+                'Set-Cookie': `token=${token}; HttpOnly; Path=/; Max-Age=3600; Secure; SameSite=Strict`,
+                'Content-Type': 'application/json',
             },
         });
 
     } catch (error) {
         console.error('Error en la API de login:', error);
-        return NextResponse.json({ message: 'Error en el servidor', error: error.message }, { status: 500 }); // Incluye el mensaje de error para depuración
+        return NextResponse.json({ message: 'Error en el servidor', error: error.message }, { status: 500 });
     }
 }

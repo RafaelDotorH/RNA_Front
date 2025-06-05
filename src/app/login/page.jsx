@@ -170,7 +170,6 @@ function LoginPage() {
 
     return (
         <Box className="my-component">
-            {/* Aplicar la clase condicional aquí */}
             <form onSubmit={handleSubmit} className={`card-3d-wrap ${!isLogin ? 'register-active' : ''}`}>
                 <div className="card-3d-wrapper">
                     <div className="card-front">
