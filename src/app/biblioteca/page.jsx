@@ -167,10 +167,10 @@ const Biblioteca = () => {
 
     return (
         <>
-            <div className="container mt-5 pt-5">
+            <div className="container mt-5">
                 <div className="row">
-                    <div className="col-md-8">
-                        <h1 className="mb-4">Biblioteca de Artículos Científicos</h1>
+                    <div className="col-md-6 mt-3">
+                        <h2 className="mb-4">Biblioteca de Artículos Científicos</h2>
                         {error && <div className="alert alert-danger" role="alert">{error}</div>}
                         {successMessage && <div className="alert alert-success" role="alert">{successMessage}</div>}
                         <div className="input-group mb-3">
@@ -183,7 +183,7 @@ const Biblioteca = () => {
                                 aria-label="Buscar artículos"
                             />
                         </div>
-                        <div className="mb-3">
+                        <div className="mb-1">
                             <label htmlFor="fileInput" className="form-label">Seleccionar PDF para subir:</label>
                             <input
                                 type="file"
@@ -195,7 +195,7 @@ const Biblioteca = () => {
                             />
                         </div>
                         <button
-                            className="btn btn-primary mb-4"
+                            className="btn btn-primary mb-1"
                             onClick={handleSubir}
                             disabled={isLoading || !archivo}
                         >
@@ -234,10 +234,10 @@ const Biblioteca = () => {
                             )}
                         </div>
                     </div>
-                    <div className="col-md-4">
-                        <h2 className="mb-3">Vista Previa</h2>
+                    <div className="col-md-6">
+                        <h3 className="mb-3 mt-3">Vista Previa</h3>
                         {selectedPdfUrl ? (
-                            <div style={{ border: '1px solid #eee', height: '75vh', overflowY: 'auto', background: '#f8f9fa' }}>
+                            <div className='mb-5' style={{ border: '1px solid #eee', height: '80vh', overflowY: 'auto', background: '#f8f9fa' }}>
                                 <Document
                                     file={selectedPdfUrl}
                                     onLoadSuccess={onDocumentLoadSuccess}
@@ -254,7 +254,7 @@ const Biblioteca = () => {
                                         <Page
                                             key={`page_${index + 1}`}
                                             pageNumber={index + 1}
-                                            width={document.querySelector('.col-md-4')?.getBoundingClientRect().width ? Math.max(document.querySelector('.col-md-4').getBoundingClientRect().width * 0.9, 250) : 300}
+                                            width={document.querySelector('.col-md-6')?.getBoundingClientRect().width ? Math.max(document.querySelector('.col-md-6').getBoundingClientRect().width * 0.9, 250) : 300}
                                             renderTextLayer={true}
                                             renderAnnotationLayer={true}
                                         />

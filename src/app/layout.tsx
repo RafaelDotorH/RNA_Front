@@ -35,7 +35,7 @@ function ThemeApplicator({ children }: { children: React.ReactNode }) {
   const loadingRoutes = ["/menu", "/principal", "/nosotros", "/biblioteca"];
   if (loading && isClient && loadingRoutes.includes(pathname)) {
     return (
-      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100vh', backgroundColor: '#f0f0f0' }}>
+      <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: 'auto', backgroundColor: '#f0f0f0' }}>
       </div>
     );
   }
