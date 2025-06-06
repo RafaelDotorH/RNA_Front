@@ -21,19 +21,6 @@ const VistaCliente = () => (
     </>
 );
 
-const VistaModerador = () => (
-    <>
-        <section data-bgcolor="#add8e6" data-textcolor="#00008b" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
-            <h1>Panel de Moderador</h1>
-            <p>Herramientas y contenido para moderadores.</p>
-        </section>
-        <section data-bgcolor="#90ee90" data-textcolor="#006400" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
-            <h2>Contenido Pendiente de Revisión</h2>
-            <p>Listado de items a moderar.</p>
-        </section>
-    </>
-);
-
 const VistaAdministrador = () => (
     <>
         <section data-bgcolor="#ffd700" data-textcolor="#8b4513" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
@@ -106,7 +93,6 @@ const Menu = () => {
 
         switch (userRole) {
             case 'administrador': return <VistaAdministrador />;
-            case 'moderador': return <VistaModerador />;
             default: return <VistaCliente />;
         }
     };
