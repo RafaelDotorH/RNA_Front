@@ -41,6 +41,7 @@ function ThemeApplicator({ children }: { children: React.ReactNode }) {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   preload('https://img.freepik.com/vector-gratis/fondo-monocromatico-blanco-estilo-papel_23-2148997884.jpg?t=st=1741737122~exp=1741740722~hmac=2dcf587cfefc605cbdd3dba8373d00f67e505cbeec7461459c2a081904c24fbb&w=1060', { as: 'image' });
+  preload('https://wallpapers.com/images/hd/garden-design-1600-x-1000-wallpaper-yuqx7dv2wixtjjd0.jpg', { as: 'image' });
   return (
     <html lang="en">
       <head>
