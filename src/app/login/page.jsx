@@ -122,10 +122,8 @@ function LoginPage() {
                 });
                 const apiDataMongo = await apiResponseMongo.json();
                 if (apiResponseMongo.ok) {
-                    console.log(apiDataMongo.message);
                     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
                     const user = userCredential.user;
-                    console.log('Usuario registrado con Firebase:', user);
 
                     await sendEmailVerification(user);
 
@@ -136,7 +134,6 @@ function LoginPage() {
                     setPassword('');
                     setConfirmPassword('');
                 } else {
-                    console.log(apiDataMongo.message || 'Error del servidor al procesar el registro.');
                     setError(apiDataMongo.message || 'Error del servidor al procesar el registro.');
                 }
 

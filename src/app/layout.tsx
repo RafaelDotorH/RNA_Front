@@ -2,7 +2,6 @@
 import { AuthProvider, useAuth } from './lib/authContext';
 import './globals.css';
 import { Inter } from 'next/font/google';
-// 1. Importa useState y usePathname
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 
@@ -10,12 +9,9 @@ const inter = Inter({ subsets: ['latin'] });
 
 function ThemeApplicator({ children }: { children: React.ReactNode }) {
   const { appTheme, loading } = useAuth();
-  // 2. Agrega el estado para saber si estamos en el cliente
   const [isClient, setIsClient] = useState(false);
-  // 3. Usa el hook para obtener la ruta de forma segura
   const pathname = usePathname();
 
-  // Este useEffect es para aplicar el tema, está bien como lo tienes.
   useEffect(() => {
     if (!loading && appTheme) {
       document.body.style.backgroundColor = appTheme.appBackgroundColor;
@@ -31,7 +27,6 @@ function ThemeApplicator({ children }: { children: React.ReactNode }) {
     setIsClient(true);
   }, []);
 
-  // 5. Corrige la condición para que sea segura y consistente
   const loadingRoutes = ["/menu", "/principal", "/nosotros", "/biblioteca"];
   if (loading && isClient && loadingRoutes.includes(pathname)) {
     return (

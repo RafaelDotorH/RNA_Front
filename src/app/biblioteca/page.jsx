@@ -65,6 +65,7 @@ const Biblioteca = () => {
     }, [autoPreviewLoaded, busqueda]);
 
     useEffect(() => {
+        console.log('Biblioteca useEffect: user:', user);
         if (user) {
             fetchArticulos();
         }
