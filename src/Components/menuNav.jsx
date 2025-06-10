@@ -97,15 +97,14 @@ export default function MenuNav() {
                             <span className="link-text">Nosotros</span>
                         </Link>
                     </li>
-                    <li className="navbar-item mobile-only-separator"></li>
-                        <Link href="/" className="navbar-item flexbox-left" onClick={handleSignOut}>
-                            <div className="navbar-item-inner flexbox-left" style={{cursor: 'pointer'}}>
-                                    <div className="navbar-item-inner-icon-wrapper flexbox">
-                                        {isClient && <IonIcon icon={logOutOutline} />}
-                                    </div>
-                                    <span className="link-text">Cerrar Sesión</span>
-                            </div>
+                    <li className="navbar-item flexbox-left">
+                        <Link href="/" className="navbar-item-inner flexbox-left" onClick={handleSignOut}>
+                                <div className="navbar-item-inner-icon-wrapper flexbox">
+                                    {isClient && <IonIcon icon={logOutOutline} />}
+                                </div>
+                                <span className="link-text">Cerrar Sesión</span>
                         </Link>
+                    </li>
                 </ul>
             </nav>
         </>

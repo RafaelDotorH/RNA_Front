@@ -4,7 +4,6 @@ import './globals.css';
 import { Inter } from 'next/font/google';
 import { useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
-import type { Metadata } from "next";
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -38,11 +37,6 @@ function ThemeApplicator({ children }: { children: React.ReactNode }) {
 
   return <>{children}</>;
 }
-
-export const metadata: Metadata = {
-  title: "Aplicacion web con RNA",
-  description: "Aplicativo para redes neuronales artificiales para la identificacion de plantas medicinales",
-};
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (

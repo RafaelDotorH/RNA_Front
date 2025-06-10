@@ -1,5 +1,4 @@
 "use client"
-// 1. Se importan los hooks necesarios de React y Next.js
 import React, { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 
