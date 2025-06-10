@@ -1,0 +1,11 @@
+# robots.txt para el proyecto RNA_Front
+
+# Permite a todos los crawlers (robots) acceder a todo el sitio
+User-agent: *
+Allow: /
+
+# Bloquea el acceso de los crawlers a las rutas de la API
+Disallow: /api/
+
+# Ubicación del sitemap (reemplaza con tu dominio real cuando lo despliegues)
+Sitemap: https://rna-front.vercel.app/
