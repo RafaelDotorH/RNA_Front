@@ -110,13 +110,7 @@
 }
 
 .my-component .card-3d-wrap.register-active {
-  height: 720px; /* Ajusta esta altura según el contenido del registro */
-  /* Si .card-3d-wrapper o .card-front tienen alturas fijas
-     o necesitan ajustarse, también puedes hacerlo aquí.
-     Por ejemplo, si tenían height: 100% y eso causa problemas
-     con el contenido que se desborda del .center-wrap,
-     podrías necesitar ajustar la altura del .center-wrap
-     o la forma en que se maneja el overflow. */
+  height: 720px; 
 }
 
 .my-component .card-3d-wrapper {
@@ -130,7 +124,7 @@
   transition: all 600ms ease-out;
 }
 
-.my-component .card-front, .my-component .card-back { /* card-back no se usa actualmente en tu JSX pero está en tu CSS original */
+.my-component .card-front, .my-component .card-back {
   width: 100%;
   height: 100%; /* Esto hará que se ajuste a la altura del .card-3d-wrap */
   background-color: #2a2b38;
