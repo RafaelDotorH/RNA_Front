@@ -22,7 +22,6 @@ export async function POST(req) {
         });
 
     } catch (error) {
-        console.error('Error en la API de login:', error);
         return NextResponse.json({ message: 'Error en el servidor', error: error.message }, { status: 500 });
     }
 }

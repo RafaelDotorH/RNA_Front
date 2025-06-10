@@ -10,7 +10,6 @@ export async function POST() {
       },
     });
   } catch (error) {
-    console.error('Error al cerrar sesión:', error);
     return NextResponse.json(
       { message: 'Error en el servidor', error: error.message },
       { status: 500 }

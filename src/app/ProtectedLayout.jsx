@@ -7,7 +7,6 @@ export default function ProtectedLayout({ children }) {
     const { loading } = useAuth();
 
     const mainContentStyle = {
-        // Los estilos para #main se manejan principalmente en menuNav.css
     };
 
     if (loading) {

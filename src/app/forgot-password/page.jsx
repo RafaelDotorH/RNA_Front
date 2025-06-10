@@ -33,7 +33,6 @@ function ForgotPasswordPage() {
         setIsLoading(true);
 
         try {
-            console.log(`Verificando email en MongoDB: ${email}`);
             const checkEmailResponse = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`);
             const checkEmailData = await checkEmailResponse.json();
 
@@ -48,7 +47,6 @@ function ForgotPasswordPage() {
                 return;
             }
 
-            console.log(`Email encontrado en MongoDB. Intentando enviar correo de restablecimiento con Firebase para: ${email}`);
             await sendPasswordResetEmail(auth, email);
             // Mensaje de éxito
             setSuccessMessage('Tu solicitud ha sido procesada. Recibirás un correo con instrucciones para restablecer tu contraseña en breve. Por favor, revisa tu bandeja de entrada y la carpeta de spam(correo no deseado).');

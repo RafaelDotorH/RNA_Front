@@ -17,18 +17,14 @@ export async function GET(req) {
 
     try {const normalizedEmail = email.trim().toLowerCase();
 
-        console.log(`[API Check Email] Buscando email en MongoDB: ${normalizedEmail}`);
-
         const existingUser = await UserModel.findOne({ email: normalizedEmail });
 
         if (existingUser) {
-            console.log(`[API Check Email] Email ENCONTRADO en MongoDB: ${normalizedEmail}`);
             return NextResponse.json(
                 { exists: true, message: 'El correo electrónico ya está registrado.' },
                 { status: 200 }
             );
         } else {
-            console.log(`[API Check Email] Email NO ENCONTRADO en MongoDB: ${normalizedEmail}`);
             return NextResponse.json(
                 { exists: false, message: 'El correo electrónico no está registrado.' },
                 { status: 200 } 
