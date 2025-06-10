@@ -1,69 +1,86 @@
-"use client"
-import React, { createContext, useState, useEffect } from 'react';
-import { useRouter } from 'next/navigation'; // Importa useRouter
+'use client';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import { onAuthStateChanged, getAuth } from 'firebase/auth';
+import { app } from '@/app/lib/firebasedb';
+import { getThemeForRole } from '@/app/CSS/dynamicStyles';
 
-export const AuthContext = createContext();
+const auth = getAuth(app);
+const AuthContext = createContext();
+
+export const useAuth = () => useContext(AuthContext);
 
 export const AuthProvider = ({ children }) => {
     const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true); // Estado de carga
-    const router = useRouter();
+    const [loading, setLoading] = useState(true);
+    const [userRole, setUserRole] = useState('default');
+    const [theme, setTheme] = useState(getThemeForRole('default'));
+    const [isLoadingRole, setIsLoadingRole] = useState(true);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-          const storedUser = localStorage.getItem('user');
-          if(storedUser){
-            setUser(JSON.parse(storedUser)) 
-          }
-            // Idealmente: Aquí también validarías el token con tu backend
-        }
-        setLoading(false); // Establece loading a false después de verificar
+        const unsubscribe = onAuthStateChanged(auth, (user) => {
+            if (user) {
+                setUser(user);
+            } else {
+                setUser(null);
+                setUserRole('default');
+            }
+            setLoading(false);
+        });
+        return () => unsubscribe();
     }, []);
 
-
-    const login = async (email, password) => {
-        try {
-            const response = await fetch('http://localhost:8000/api/login/', { 
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ email, password }),
-            });
-
-            if (!response.ok) {
-                const errorData = await response.json();
-                throw new Error(errorData.detail || "Error al iniciar sesión");
+    useEffect(() => {
+        const fetchUserRole = async () => {
+            if (!user) {
+                setIsLoadingRole(false);
+                return;
             }
+            setIsLoadingRole(true);
+            try {
+                const response = await fetch('/api/user/role');
+                const data = await response.json();
+                if (response.ok && data.role) {
+                    setUserRole(data.role);
+                } else {
+                    setUserRole('cliente');
+                }
+            } catch (error) {
+                console.error("Error al obtener el rol del usuario:", error);
+                setUserRole('cliente');
+            } finally {
+                setIsLoadingRole(false);
+            }
+        };
+        fetchUserRole();
+    }, [user]);
 
-            const data = await response.json();
-            localStorage.setItem('token', data.token);
-            localStorage.setItem('user', JSON.stringify(data.user));
-            setUser(data.user);
-            router.push('/profile'); 
-            return { success: true };
+    useEffect(() => {
+        setTheme(getThemeForRole(userRole));
+    }, [userRole]);
+
+    const logout = async () => {
+         try {
+            await fetch('/api/auth/logout', { method: 'POST' });
         } catch (error) {
-            console.error("Error de inicio de sesión:", error);
-            return { success: false, error: error.message };
+            console.error("Error al llamar a /api/auth/logout en contexto", error);
         }
+        setUser(null); 
+        setTheme(getThemeForRole('default')); // Actualizar tema de la app
+        sessionStorage.removeItem('rnaAppLandedOnMenu');
+        setLoading(false);
     };
 
-    const logout = () => {
-        localStorage.removeItem('token');  // Elimina el token
-        localStorage.removeItem('user');
-        setUser(null);               // Limpia el estado del usuario
-        // La redirección la maneja el LogoutButton, no aqui.
+    const value = {
+        user,
+        loading: loading || isLoadingRole,
+        logout,
+        userRole,
+        theme,
     };
 
-    if (loading) {
-        return <div>Cargando...</div>; // Muestra un indicador mientras carga
+    if (!theme) {
+        return <div>Cargando tema...</div>;
     }
 
-
-    return (
-        <AuthContext.Provider value={{ user, login, logout }}>
-            {children}
-        </AuthContext.Provider>
-    );
+    return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
