@@ -6,9 +6,9 @@ import ScrollTrigger from 'gsap/ScrollTrigger';
 import MenuNav from '../../Components/menuNav';
 import Fooder from '../../Components/fooder';
 
-gsap.registerPlugin(ScrollTrigger);
+gsap.registerPlugin(ScrollTrigger); // Registra el plugin ScrollTrigger
 
-const VistaCliente = () => (
+const VistaCliente = () => ( // Componente para la vista del cliente
     <>
         <section data-bgcolor="#bcb8ad" data-textcolor="#032f35" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
             <h1>Bienvenido Cliente</h1>
@@ -21,7 +21,7 @@ const VistaCliente = () => (
     </>
 );
 
-const VistaAdministrador = () => (
+const VistaAdministrador = () => ( // Componente para la vista del administrador
     <>
         <section data-bgcolor="#ffd700" data-textcolor="#8b4513" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
             <h1>Panel de Administración</h1>
@@ -34,17 +34,17 @@ const VistaAdministrador = () => (
     </>
 );
 
-const Menu = () => {
-    const [userRole, setUserRole] = useState(null);
+const Menu = () => { // Componente principal del menú
+    const [userRole, setUserRole] = useState(null); // Estado para almacenar el rol del usuario
 
-    const initAnimations = useCallback(() => {
+    const initAnimations = useCallback(() => { // Función para inicializar las animaciones y ScrollTrigger
         const sections = gsap.utils.toArray("section[data-bgcolor]");
         
-        sections.forEach(section => {
+        sections.forEach(section => { // Itera sobre cada sección con un atributo data-bgcolor
             const bgColor = section.dataset.bgcolor;
             const textColor = section.dataset.textcolor;
 
-            ScrollTrigger.create({
+            ScrollTrigger.create({ // Crea un ScrollTrigger para cada sección
                 trigger: section,
                 start: "top 50%",
                 end: "bottom 50%",
@@ -54,7 +54,7 @@ const Menu = () => {
         });
     }, []);
 
-    useEffect(() => {
+    useEffect(() => { // Efecto para obtener el rol del usuario al cargar el componente
         const fetchUserRole = async () => {
             try {
                 const response = await fetch('/api/user/role');
@@ -69,21 +69,21 @@ const Menu = () => {
         fetchUserRole();
     }, []);
 
-    useEffect(() => {
+    useEffect(() => { // Efecto para inicializar las animaciones y ScrollTrigger una vez que se haya obtenido el rol del usuario
         if (userRole) {
             const timer = setTimeout(() => {
                 initAnimations();
             }, 100);
 
-            return () => {
+            return () => { // Limpieza del efecto
                 clearTimeout(timer);
-                ScrollTrigger.getAll().forEach(trigger => trigger.kill());
+                ScrollTrigger.getAll().forEach(trigger => trigger.kill()); // Elimina todos los ScrollTriggers existentes
             };
         }
-    }, [userRole, initAnimations]);
+    }, [userRole, initAnimations]); // Dependencias del efecto para que se ejecute cuando cambie el rol del usuario
 
-    const renderContentByRole = () => {
-        if (!userRole) {
+    const renderContentByRole = () => { // Función para renderizar el contenido basado en el rol del usuario
+        if (!userRole) { // Si el rol del usuario aún no se ha determinado, muestra un mensaje de carga
             return (
                 <section style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                     <h1>Cargando...</h1>
@@ -91,21 +91,21 @@ const Menu = () => {
             );
         }
 
-        switch (userRole) {
-            case 'administrador': return <VistaAdministrador />;
-            default: return <VistaCliente />;
+        switch (userRole) { // Verifica el rol del usuario y renderiza el contenido correspondiente
+            case 'administrador': return <VistaAdministrador />; // Vista para el administrador
+            default: return <VistaCliente />; // Vista para el cliente (por defecto)
         }
     };
 
-    return (
+    return ( // Renderiza el menú con la navegación y el contenido basado en el rol del usuario
         <div>
             <MenuNav />
             <main>
-                {renderContentByRole()}
+                {renderContentByRole()} {/* Renderiza el contenido basado en el rol del usuario */}
             </main>
             <Fooder />
         </div>
     );
 };
 
-export default Menu;
+export default Menu; // Exporta el componente Menu como el componente principal de la aplicación

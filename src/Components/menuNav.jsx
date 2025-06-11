@@ -4,31 +4,29 @@ import './menuNav.css';
 import { IonIcon } from '@ionic/react';
 import { homeOutline, logOutOutline, libraryOutline, settingsOutline, informationOutline, menuOutline, closeOutline } from 'ionicons/icons';
 import React, { useState, useEffect, useRef } from 'react';
-import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/lib/authContext';
 
-export default function MenuNav() {
-    const router = useRouter();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const navRef = useRef(null);
-    const { logout } = useAuth();
+export default function MenuNav() { // Componente de navegación del menú
+    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false); // Estado para manejar la apertura/cierre del menú móvil
+    const navRef = useRef(null); // Referencia al elemento de navegación para manejar clics fuera del menú
+    const { logout } = useAuth(); // Importa la función de cierre de sesión del contexto de autenticación
 
-    const [isClient, setIsClient] = useState(false);
+    const [isClient, setIsClient] = useState(false); // Estado para verificar si el componente se está renderizando en el cliente
 
-    useEffect(() => {
+    useEffect(() => { // Efecto para verificar si el componente se está renderizando en el cliente
         setIsClient(true);
     }, []);
 
-    const toggleMobileMenu = () => {
+    const toggleMobileMenu = () => { // Función para alternar la apertura/cierre del menú móvil
         setIsMobileMenuOpen(!isMobileMenuOpen);
     };
 
-    async function handleSignOut() {
+    async function handleSignOut() { // Función para manejar el cierre de sesión del usuario
         await logout();
         setIsMobileMenuOpen(false);
     }
 
-    useEffect(() => {
+    useEffect(() => { // Efecto para manejar clics fuera del menú móvil
         function handleClickOutside(event) {
             if (navRef.current && !navRef.current.contains(event.target) && isMobileMenuOpen) {
                 const menuButton = document.getElementById('mobile-menu-button');
@@ -49,11 +47,11 @@ export default function MenuNav() {
         };
     }, [isMobileMenuOpen, navRef]);
 
-    const handleLinkClick = () => {
+    const handleLinkClick = () => { // Función para manejar el clic en los enlaces del menú
         setIsMobileMenuOpen(false);
     };
 
-    return (
+    return ( // Renderiza el componente de navegación del menú
         <>
             <button id="mobile-menu-button" className="mobile-menu-button" onClick={toggleMobileMenu}>
                 {isClient && <IonIcon icon={isMobileMenuOpen ? closeOutline : menuOutline} />}

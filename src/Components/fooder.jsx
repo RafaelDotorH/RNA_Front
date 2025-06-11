@@ -1,9 +1,6 @@
-// src/Components/fooder.jsx
 import React from 'react';
-// Ya no se importa useAuth si no se usa el tema dinámico aquí
 
-export default function Fooder() {
-    // Ya no se obtiene theme de useAuth()
+export default function Fooder() {// Componente de pie de página
 
     const footerStyle = { // Estilos originales en línea
         left: '0',
@@ -15,7 +12,7 @@ export default function Fooder() {
         padding: '10px 0'
     };
 
-    return (
+    return ( // Renderiza el pie de página con los estilos definidos
         <footer style={footerStyle}>
             <p>&copy; {new Date().getFullYear()} Your Company. All rights reserved.</p>
         </footer>

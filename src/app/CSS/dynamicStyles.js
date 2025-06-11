@@ -1,4 +1,4 @@
-const baseColors = {
+const baseColors = { // Define colores base de la aplicación
   white: '#FFFFFF',
   black: '#000000',
   lightGray: '#f8f9fa',
@@ -11,7 +11,7 @@ const baseColors = {
   infoCyan: '#0dcaf0',
 };
 
-const roleStyles = {
+const roleStyles = { // Define estilos específicos para cada rol de usuario
   cliente: {
     theme: {
       appBackgroundColor: baseColors.white,
@@ -22,17 +22,7 @@ const roleStyles = {
       buttonText: baseColors.white,
     },
   },
-  moderador: {
-    theme: {
-      appBackgroundColor: '#f0f7f0',
-      appTextColor: '#2f3e2f',
-      appPrimaryColor: baseColors.successGreen,
-      appSecondaryColor: baseColors.warningYellow,
-      buttonBackground: baseColors.successGreen,
-      buttonText: baseColors.white,
-    },
-  },
-  administrador: {
+  administrador: { // Estilos para el rol de administrador
     theme: {
       appBackgroundColor: '#fdeeee',
       appTextColor: baseColors.black,
@@ -42,7 +32,7 @@ const roleStyles = {
       buttonText: baseColors.white,
     },
   },
-  default: {
+  default: { // Estilos por defecto para roles no especificados
     theme: {
       appBackgroundColor: baseColors.white,
       appTextColor: baseColors.darkGray,
@@ -54,7 +44,7 @@ const roleStyles = {
   },
 };
 
-export const getThemeForRole = (role) => {
+export const getThemeForRole = (role) => { // Función para obtener el tema basado en el rol del usuario
   const styles = roleStyles[role] || roleStyles.default;
   return styles.theme;
 };

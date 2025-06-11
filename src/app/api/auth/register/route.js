@@ -6,10 +6,10 @@ export async function POST(req) {
     await dbConnect();
 
     try {
-        const body = await req.json();
-        const { username, email} = body;
+        const body = await req.json(); // Obtener el cuerpo de la solicitud
+        const { username, email} = body; // Extraer username y email del cuerpo
 
-        if (!username || !email ) { 
+        if (!username || !email ) {  // Verificar si faltan campos obligatorios
             return NextResponse.json({ message: 'Faltan campos obligatorios (username, email)' }, { status: 400 });
         }
 
@@ -19,23 +19,23 @@ export async function POST(req) {
             return NextResponse.json({ message: 'El nombre de usuario ya existe' }, { status: 409 });
         }
         const existingUserByEmail = await UserModel.findOne({ email });
-        if (existingUserByEmail) {
+        if (existingUserByEmail) { // Verificar si el correo electrónico ya está registrado
             return NextResponse.json({ message: 'El correo electrónico ya está registrado' }, { status: 409 });
         }
 
-        const userDataToSave = {
+        const userDataToSave = { // Crear un objeto con los datos del usuario
             username,
             email,
             rol: "cliente"
         };
 
-        const newUser = new UserModel(userDataToSave);
+        const newUser = new UserModel(userDataToSave); // Crear una instancia del modelo UserModel con los datos del usuario
 
-        await newUser.save();
+        await newUser.save(); // Guardar el nuevo usuario en la base de datos
 
-        return NextResponse.json({ message: 'Usuario registrado en mongo con éxito', user: newUser.toObject() }, { status: 201 });
+        return NextResponse.json({ message: 'Usuario registrado en mongo con éxito', user: newUser.toObject() }, { status: 201 }); // Respuesta JSON indicando que el usuario se ha registrado correctamente
 
-    } catch (error) {
+    } catch (error) { // Manejo de errores
         if (error.name === 'ValidationError') {
             return NextResponse.json({ message: 'Error de validación', errors: error.errors }, { status: 400 });
         }
