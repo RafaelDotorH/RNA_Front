@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/mongodb'; // Importa tu función de conexión a la base de datos
-import Enlace from '@/app/models/enlace'; // Importa tu modelo de Enlace
+import Enlace from '@/app/models/Enlace'; // Importa tu modelo de Enlace
 
 export async function DELETE(req, context) {
     await dbConnect();
