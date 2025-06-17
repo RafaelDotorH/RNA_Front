@@ -4,279 +4,242 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from '@/app/lib/authContext';
 import MenuNav from '@/Components/menuNav';
 import Fooder from '@/Components/fooder';
-import { Document, Page, pdfjs } from 'react-pdf';
-import 'react-pdf/dist/esm/Page/AnnotationLayer.css';
-import 'react-pdf/dist/esm/Page/TextLayer.css';
 
-pdfjs.GlobalWorkerOptions.workerSrc = `/js/pdf.worker.min.mjs`;
-
-const Biblioteca = () => {
-    const { user, loading: authLoading, theme } = useAuth();
+const BibliotecaConRoles = () => {
+    const { user, loading: authLoading } = useAuth();
     const router = useRouter();
     
-    const [articulos, setArticulos] = useState([]);
+    const [userRole, setUserRole] = useState(null);
+    const [enlaces, setEnlaces] = useState([]);
     const [busqueda, setBusqueda] = useState('');
-    const [archivo, setArchivo] = useState(null);
+    const initialState = { titulo: '', descripcion: '', fecha: '', url: '' };
+    const [nuevoEnlace, setNuevoEnlace] = useState(initialState);
     const [error, setError] = useState('');
     const [successMessage, setSuccessMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const [selectedPdfUrl, setSelectedPdfUrl] = useState(null);
-    const [numPages, setNumPages] = useState(null);
-    const [autoPreviewLoaded, setAutoPreviewLoaded] = useState(false);
+    const [isLoading, setIsLoading] = useState(true);
+    const [showModal, setShowModal] = useState(false);
+    const [enlaceAEliminar, setEnlaceAEliminar] = useState(null);
+
+    const obtenerFechaLocal = () => {
+        const ahora = new Date();
+        const anio = ahora.getFullYear();
+        const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+        const dia = String(ahora.getDate()).padStart(2, '0');
+        return `${anio}-${mes}-${dia}`;
+    };
+
+    const hoy = obtenerFechaLocal();
 
     useEffect(() => {
-            if (authLoading) {
-                router.push('/menu');
+        const fetchUserRole = async () => {
+            try {
+                const response = await fetch('../api/user/role');
+                const data = await response.json();
+                setUserRole(response.ok && data.role ? data.role : 'cliente');
+            } catch (error) {
+                console.error("Error al obtener el rol:", error);
+                setUserRole('cliente');
             }
-        }, [authLoading, user, router]);
+        };
+        fetchUserRole();
+    }, []);
 
-    const fetchArticulos = useCallback(async () => {
+    const fetchEnlaces = useCallback(async () => {
         setIsLoading(true);
         setError('');
         try {
-            const response = await fetch('../biblioteca/articles');
-            if (!response.ok) {
-                const data = await response.json();
-                throw new Error(data.message || 'No se pudieron cargar los artículos');
-            }
+            const response = await fetch('../api/enlaces');
+            if (!response.ok) throw new Error('No se pudieron cargar los enlaces');
             const data = await response.json();
-            const fetchedArticulos = data.articles || [];
-            setArticulos(fetchedArticulos);
-
-            if (fetchedArticulos.length > 0 && !autoPreviewLoaded) {
-                const articulosFiltradosCurrent = fetchedArticulos.filter(a =>
-                    a.name.toLowerCase().includes(busqueda.toLowerCase())
-                );
-                if (busqueda === '' || (articulosFiltradosCurrent.length > 0 && articulosFiltradosCurrent[0]._id === fetchedArticulos[0]._id) ) {
-                    handlePreview(fetchedArticulos[0].downloadURL);
-                    setAutoPreviewLoaded(true);
-                }
-            } else if (fetchedArticulos.length === 0) {
-                setSelectedPdfUrl(null);
-            }
-
+            setEnlaces(data.enlaces || []);
         } catch (err) {
-            setError(`Error al cargar artículos: ${err.message}`);
-            setArticulos([]);
-            setSelectedPdfUrl(null);
+            setError(`Error al cargar enlaces: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
-    }, [autoPreviewLoaded, busqueda]);
+    }, []);
 
     useEffect(() => {
-        console.log('Biblioteca useEffect: user:', user);
-        if (user) {
-            fetchArticulos();
+        if (userRole) {
+            fetchEnlaces();
         }
-    }, [fetchArticulos, user]);
+    }, [userRole, fetchEnlaces]);
 
-    const handleBuscar = (e) => {
-        const nuevaBusqueda = e.target.value;
-        setBusqueda(nuevaBusqueda);
-        setSelectedPdfUrl(null);
-        setAutoPreviewLoaded(false);
+    const handleInputChange = (e) => {
+        const { name, value } = e.target;
+        setNuevoEnlace(prevState => ({ ...prevState, [name]: value }));
     };
 
-    const handleArchivoChange = (e) => {
-        const file = e.target.files[0];
-        if (file && file.type === "application/pdf") {
-            setArchivo(file);
-            setError('');
-        } else if (file) {
-            setError('Por favor, selecciona solo archivos PDF.');
-            setArchivo(null);
-            e.target.value = null;
-        } else {
-            setArchivo(null);
+    const handleAgregarEnlace = async () => {
+        if (!nuevoEnlace.titulo || !nuevoEnlace.descripcion || !nuevoEnlace.url || !nuevoEnlace.fecha) {
+            setError('Todos los campos son obligatorios.');
+            return;
         }
-    };
-
-    const handleSubir = async () => {
-        if (!archivo) {
-            setError('Por favor, selecciona un archivo PDF para subir.');
+        if (nuevoEnlace.fecha > hoy) {
+            setError('La fecha no puede ser posterior a la fecha actual.');
             return;
         }
         setIsLoading(true);
         setError('');
         setSuccessMessage('');
-        const formData = new FormData();
-        formData.append('pdf', archivo);
         try {
-            const response = await fetch('../biblioteca/upload', {
+            const response = await fetch('../api/enlaces', {
                 method: 'POST',
-                body: formData,
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(nuevoEnlace),
             });
             const data = await response.json();
-            if (!response.ok) {
-                throw new Error(data.message || 'Error al subir el archivo.');
-            }
-            setSuccessMessage(data.message || '¡Artículo subido con éxito!');
-            setArchivo(null);
-            if(document.getElementById('fileInput')) {
-                 document.getElementById('fileInput').value = '';
-            }
-            setAutoPreviewLoaded(false);
-            fetchArticulos();
+            if (!response.ok) throw new Error(data.message || 'Error al agregar el enlace.');
+            setSuccessMessage('¡Enlace agregado con éxito!');
+            setNuevoEnlace(initialState);
+            await fetchEnlaces();
         } catch (err) {
-            setError(`Error al subir: ${err.message}`);
+            setError(`Error al agregar: ${err.message}`);
         } finally {
             setIsLoading(false);
         }
     };
-
-    const articulosFiltrados = React.useMemo(() => {
-        if (!Array.isArray(articulos)) return [];
-        return articulos.filter((articulo) =>
-            articulo && articulo.name && typeof articulo.name === 'string' &&
-            articulo.name.toLowerCase().includes(busqueda.toLowerCase())
-        );
-    }, [articulos, busqueda]);
-
-    const handlePreview = (downloadUrl) => {
-        setSelectedPdfUrl(downloadUrl);
-        setNumPages(null);
+    
+    const handleEliminarEnlace = async (id) => {
+        if (!id) return;
+        setIsLoading(true);
+        try {
+            const response = await fetch(`../api/enlaces/${id}`, { method: 'DELETE' });
+            if (!response.ok) throw new Error('No se pudo eliminar el enlace.');
+            setSuccessMessage('Enlace eliminado correctamente.');
+            await fetchEnlaces();
+        } catch (err) {
+            setError(`Error al eliminar: ${err.message}`);
+        } finally {
+            setIsLoading(false);
+            setShowModal(false);
+            setEnlaceAEliminar(null);
+        }
     };
 
-    function onDocumentLoadSuccess({ numPages: nextNumPages }) {
-        setNumPages(nextNumPages);
-    }
+    const abrirModalConfirmacion = (id) => {
+        setEnlaceAEliminar(id);
+        setShowModal(true);
+    };
 
-    const documentOptions = React.useMemo(() => ({
-        cMapUrl: `https://unpkg.com/pdfjs-dist@${pdfjs.version}/cmaps/`,
-        cMapPacked: true,
-    }), []);
-
-    if (authLoading) {
-        return (
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                backgroundColor: theme ? theme.appBackgroundColor : '#fff',
-                color: theme ? theme.appTextColor : '#000'
-            }}>
-                <h1>Cargando...</h1>
-            </div>
+    const enlacesFiltrados = React.useMemo(() => {
+        if (!Array.isArray(enlaces)) return [];
+        const busquedaLower = busqueda.toLowerCase();
+        return enlaces.filter(enlace =>
+            enlace.titulo?.toLowerCase().includes(busquedaLower) ||
+            enlace.descripcion?.toLowerCase().includes(busquedaLower) ||
+            enlace.fecha?.toString().includes(busquedaLower)
         );
+    }, [enlaces, busqueda]);
+
+    const esAdmin = userRole === 'administrador';
+
+    if (!userRole) {
+        return <div style={{ height: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><h1>Cargando...</h1></div>;
     }
 
-    if (!user) {
-        return null;
-    }
-
+    const formatDisplayDate = (dateString) => {
+        if (!dateString) return '';
+        const date = new Date(dateString + 'T00:00:00');
+        return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
+    };
     return (
         <>
-            <div className="container mt-5">
-                <div className="row">
-                    <div className="col-md-6 mt-3">
-                        <h2 className="mb-4">Biblioteca de Artículos Científicos</h2>
-                        {error && <div className="alert alert-danger" role="alert">{error}</div>}
-                        {successMessage && <div className="alert alert-success" role="alert">{successMessage}</div>}
-                        <div className="input-group mb-3">
-                            <input
-                                type="text"
-                                className="form-control"
-                                placeholder="Buscar artículos por nombre..."
-                                value={busqueda}
-                                onChange={handleBuscar}
-                                aria-label="Buscar artículos"
-                            />
-                        </div>
-                        <div className="mb-1">
-                            <label htmlFor="fileInput" className="form-label">Seleccionar PDF para subir:</label>
-                            <input
-                                type="file"
-                                className="form-control"
-                                id="fileInput"
-                                accept="application/pdf"
-                                onChange={handleArchivoChange}
-                                disabled={isLoading}
-                            />
-                        </div>
-                        <button
-                            className="btn btn-primary mb-1"
-                            onClick={handleSubir}
-                            disabled={isLoading || !archivo}
-                        >
-                            {isLoading && archivo ? 'Subiendo...' : 'Subir Artículo'}
-                        </button>
-                        <div className="mt-4">
-                            <h2>Artículos Disponibles</h2>
-                            {isLoading && articulos.length === 0 && <p>Cargando artículos...</p>}
-                            {!isLoading && articulosFiltrados.length === 0 && (
-                                <p>{busqueda ? 'No se encontraron artículos con ese nombre.' : 'Aún no se han subido artículos.'}</p>
-                            )}
-                            {articulosFiltrados.length > 0 && (
-                                <ul className="list-group">
-                                    {articulosFiltrados.map((articulo) => (
-                                        <li key={articulo._id} className="list-group-item d-flex justify-content-between align-items-center">
-                                            <a
-                                                href={articulo.downloadURL}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="link-primary text-decoration-none"
-                                                onClick={(e) => { e.preventDefault(); handlePreview(articulo.downloadURL); setAutoPreviewLoaded(true); }}
-                                                title={`Ver vista previa de ${articulo.name}`}
-                                            >
-                                                {articulo.name}
-                                            </a>
-                                            <button
-                                                className="btn btn-sm btn-outline-info"
-                                                onClick={() => {handlePreview(articulo.downloadURL); setAutoPreviewLoaded(true);}}
-                                                title="Mostrar vista previa"
-                                            >
-                                                Vista Previa
-                                            </button>
-                                        </li>
-                                    ))}
-                                </ul>
-                            )}
-                        </div>
-                    </div>
-                    <div className="col-md-6">
-                        <h3 className="mb-3 mt-3">Vista Previa</h3>
-                        {selectedPdfUrl ? (
-                            <div className='mb-5' style={{ border: '1px solid #eee', height: '80vh', overflowY: 'auto', background: '#f8f9fa' }}>
-                                <Document
-                                    file={selectedPdfUrl}
-                                    onLoadSuccess={onDocumentLoadSuccess}
-                                    onLoadError={(pdfError) => {
-                                        console.error('Error al cargar el PDF para vista previa:', pdfError);
-                                        setError(`Error al cargar vista previa: ${pdfError.message}. Verifique la URL y la configuración CORS si el problema persiste.`);
-                                        setSelectedPdfUrl(null);
-                                    }}
-                                    loading="Cargando previsualización del PDF..."
-                                    error="No se pudo cargar la vista previa del PDF."
-                                    options={documentOptions}
-                                >
-                                    {Array.from(new Array(numPages || 0), (el, index) => (
-                                        <Page
-                                            key={`page_${index + 1}`}
-                                            pageNumber={index + 1}
-                                            width={document.querySelector('.col-md-6')?.getBoundingClientRect().width ? Math.max(document.querySelector('.col-md-6').getBoundingClientRect().width * 0.9, 250) : 300}
-                                            renderTextLayer={true}
-                                            renderAnnotationLayer={true}
-                                        />
-                                    ))}
-                                </Document>
-                                {numPages && <p className="text-center mt-2 small">Total de páginas: {numPages}</p>}
-                            </div>
-                        ) : (
-                            <div className="text-center p-5 border rounded bg-light" style={{ minHeight: '200px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                                <p className="text-muted">
-                                    {isLoading ? "Cargando artículos..." : (articulos.length === 0 ? "No hay artículos para mostrar." : "Selecciona un artículo o espera la carga automática.")}
-                                </p>
+            <MenuNav />
+            <div className="container pt-5 mb-5">
+                <div className="row justify-content-center">
+                    <div className="col-md-9">
+                        <h2 className="mb-4">Biblioteca de Enlaces</h2>
+                        {error && <div className="alert alert-danger" onClick={() => setError('')} style={{cursor: 'pointer'}}>{error}</div>}
+                        {successMessage && <div className="alert alert-success" onClick={() => setSuccessMessage('')} style={{cursor: 'pointer'}}>{successMessage}</div>}
+
+                        {esAdmin && (
+                            <div className="card mb-4 shadow-sm">
+                                <div className="card-body">
+                                    <h5 className="card-title">Agregar Nuevo Enlace</h5>
+                                    <div className="mb-3">
+                                        <label htmlFor="titulo" className="form-label">Título</label>
+                                        <input type="text" className="form-control" id="titulo" name="titulo" value={nuevoEnlace.titulo} onChange={handleInputChange} placeholder="Título del enlace" disabled={isLoading} />
+                                    </div>
+                                    <div className="mb-3">
+                                        <label htmlFor="descripcion" className="form-label">Descripción</label>
+                                        <textarea className="form-control" id="descripcion" name="descripcion" rows="3" value={nuevoEnlace.descripcion} onChange={handleInputChange} placeholder="Breve resumen" disabled={isLoading}></textarea>
+                                    </div>
+                                    <div className="row">
+                                        <div className="col-md-6 mb-3">
+                                            <label htmlFor="fecha" className="form-label">Fecha</label>
+                                            <input type="date" className="form-control" id="fecha" name="fecha" value={nuevoEnlace.fecha} onChange={handleInputChange} disabled={isLoading} max={hoy}/>
+                                        </div>
+                                        <div className="col-md-6 mb-3">
+                                            <label htmlFor="url" className="form-label">URL</label>
+                                            <input type="url" className="form-control" id="url" name="url" value={nuevoEnlace.url} onChange={handleInputChange} placeholder="https://..." disabled={isLoading} />
+                                        </div>
+                                    </div>
+                                    <button className="btn btn-primary" onClick={handleAgregarEnlace} disabled={isLoading || !nuevoEnlace.titulo || !nuevoEnlace.descripcion || !nuevoEnlace.url || !nuevoEnlace.fecha}>
+                                        {isLoading ? 'Agregando...' : 'Agregar Enlace'}
+                                    </button>
+                                </div>
                             </div>
                         )}
+
+                        <h3 className="mb-3">Enlaces Disponibles</h3>
+                        <input type="text" className="form-control mb-3" placeholder="Buscar enlaces..." value={busqueda} onChange={(e) => setBusqueda(e.target.value)} />
+
+                        {isLoading && enlaces.length === 0 && <p>Cargando enlaces...</p>}
+                        {!isLoading && enlacesFiltrados.length === 0 && <p className="text-muted">{busqueda ? 'No se encontraron resultados.' : 'Aún no hay enlaces agregados.'}</p>}
+                        
+                        <div className="border rounded p-2 bg-light" style={{ maxHeight: '60vh', overflowY: 'auto' }}>
+                            <div className="list-group">
+                                {enlacesFiltrados.map(({ _id, titulo, descripcion, fecha, url }) => (
+                                    <div key={_id} className="list-group-item list-group-item-action flex-column align-items-start mb-2 border rounded shadow-sm">
+                                        <div className="d-flex w-100 justify-content-between">
+                                            <h4 className="mb-1">{titulo}</h4>
+                                            <span className="badge bg-secondary align-self-start">{formatDisplayDate(fecha)}</span>
+                                        </div>
+                                        <p className="mb-1 text-muted">{descripcion || "Sin descripción"}</p>
+                                        <a href={url} target="_blank" rel="noopener noreferrer"> URL: {url}</a>
+                                        
+                                        {esAdmin && (
+                                            <div className="d-flex justify-content-end mt-2">
+                                                <button className="btn btn-sm btn-outline-danger" onClick={() => abrirModalConfirmacion(_id)} disabled={isLoading}>
+                                                    Eliminar
+                                                </button>
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </div>
+                        </div>
                     </div>
                 </div>
             </div>
-            <MenuNav />
+            
+            {showModal && (
+                <>
+                    <div className="modal-backdrop fade show"></div>
+                    <div className="modal fade show" tabIndex="-1" style={{ display: 'block' }}>
+                        <div className="modal-dialog modal-dialog-centered">
+                            <div className="modal-content">
+                                <div className="modal-header">
+                                    <h5 className="modal-title">Confirmar Eliminación</h5>
+                                    <button type="button" className="btn-close" onClick={() => setShowModal(false)}></button>
+                                </div>
+                                <div className="modal-body">
+                                    <p>¿Estás seguro de que quieres eliminar permanentemente este enlace? Esta acción no se puede deshacer.</p>
+                                </div>
+                                <div className="modal-footer">
+                                    <button type="button" className="btn btn-secondary" onClick={() => setShowModal(false)}>Cancelar</button>
+                                    <button type="button" className="btn btn-danger" onClick={() => handleEliminarEnlace(enlaceAEliminar)}>Sí, Eliminar</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </>
+            )}
+
             <Fooder />
         </>
     );
 };
 
-export default Biblioteca;
+export default BibliotecaConRoles;

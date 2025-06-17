@@ -10,11 +10,11 @@ gsap.registerPlugin(ScrollTrigger);
 
 const VistaCliente = () => (
     <>
-        <section data-bgcolor="#bcb8ad" data-textcolor="#032f35" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
+        <section data-bgcolor="#bcb8ad" data-textcolor="#032f35" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingBottom: '50px' }}>
             <h1>Bienvenido Cliente</h1>
             <p>Contenido específico para clientes.</p>
         </section>
-        <section data-bgcolor="#eacbd1" data-textcolor="#536fae" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
+        <section data-bgcolor="#eacbd1" data-textcolor="#536fae" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingBottom: '50px' }}>
             <h2>Ofertas para Clientes</h2>
             <p>Más contenido para clientes.</p>
         </section>
@@ -23,11 +23,11 @@ const VistaCliente = () => (
 
 const VistaAdministrador = () => (
     <>
-        <section data-bgcolor="#ffd700" data-textcolor="#8b4513" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
+        <section data-bgcolor="#ffd700" data-textcolor="#8b4513" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column',  paddingBottom: '50px' }}>
             <h1>Panel de Administración</h1>
             <p>Gestión completa del sistema.</p>
         </section>
-        <section data-bgcolor="#ffb6c1" data-textcolor="#800000" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingTop: '50px', paddingBottom: '50px' }}>
+        <section data-bgcolor="#ffb6c1" data-textcolor="#800000" style={{ minHeight: '70vh', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', paddingBottom: '50px' }}>
             <h2>Estadísticas y Usuarios</h2>
             <p>Información detallada para administradores.</p>
         </section>
