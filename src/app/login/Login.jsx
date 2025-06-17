@@ -64,7 +64,7 @@ function LoginPage() { // Componente de inicio de sesión y registro
 
                 if (user.emailVerified) { // Verifica si el correo electrónico del usuario ha sido verificado
                     const idToken = await user.getIdToken(true);
-                    const apiResponse = await fetch('/api/auth/login', {
+                    const apiResponse = await fetch('../api/auth/login', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ email, idToken }),
@@ -113,7 +113,7 @@ function LoginPage() { // Componente de inicio de sesión y registro
                 return;
             }
             try { // Intenta registrar al usuario con Firebase Auth
-                const apiResponseMongo = await fetch('/api/auth/register', {
+                const apiResponseMongo = await fetch('../api/auth/register', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
