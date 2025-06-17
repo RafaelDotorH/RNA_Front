@@ -36,7 +36,7 @@ const Nosotros = () => { // Componente para la página "Sobre Nosotros"
     
     return ( // Renderiza el contenido de la página "Sobre Nosotros"
         <>
-            <div className='container mt-5 mb-5'>
+            <div className='container pt-5 mb-5'>
                 <div className='row'>
                     <div className='col-12'>
                         <h1>Sobre Nosotros</h1>
