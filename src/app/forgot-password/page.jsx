@@ -13,15 +13,15 @@ import { sendPasswordResetEmail, fetchSignInMethodsForEmail  } from 'firebase/au
 import { auth } from '../lib/firebasedb'; // Ajusta la ruta a tu config de Firebase
 
 
-function ForgotPasswordPage() {
-    const [email, setEmail] = useState('');
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
-    const backgroundImageUrl = 'https://static.vecteezy.com/system/resources/previews/016/407/729/non_2x/modern-cybersecurity-technology-background-with-padlock-vector.jpg';
+function ForgotPasswordPage() { // Página para restablecer la contraseña
+    const [email, setEmail] = useState('');// Estado para almacenar el correo electrónico ingresado
+    const [error, setError] = useState('');// Estado para almacenar mensajes de error
+    const [successMessage, setSuccessMessage] = useState('');// Estado para almacenar mensajes de éxito
+    const [isLoading, setIsLoading] = useState(false);// Estado para manejar el estado de carga
+    const router = useRouter();// Hook de Next.js para manejar la navegación
+    const backgroundImageUrl = 'https://static.vecteezy.com/system/resources/previews/016/407/729/non_2x/modern-cybersecurity-technology-background-with-padlock-vector.jpg';// URL de la imagen de fondo
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event) => { // Función para manejar el envío del formulario
         event.preventDefault();
         setError('');
         setSuccessMessage('');
@@ -32,27 +32,27 @@ function ForgotPasswordPage() {
         }
         setIsLoading(true);
 
-        try {
-            const checkEmailResponse = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`);
-            const checkEmailData = await checkEmailResponse.json();
+        try { // Verifica si el correo electrónico es válido
+            const checkEmailResponse = await fetch(`/api/auth/check-email?email=${encodeURIComponent(email)}`); // Llama a la API para verificar si el correo electrónico existe en la base de datos
+            const checkEmailData = await checkEmailResponse.json(); // Convierte la respuesta a JSON
 
-            if (!checkEmailResponse.ok) {
+            if (!checkEmailResponse.ok) { // Verifica si la respuesta de la API es exitosa
                 throw new Error(checkEmailData.message || 'Error al verificar el correo en la base de datos.');
             }
 
-            if (!checkEmailData.exists) {
+            if (!checkEmailData.exists) { // Si el correo electrónico no existe en la base de datos
                 console.log(`Email NO encontrado en MongoDB según la API: ${email}`);
                 setError('No se encontró ninguna cuenta registrada con este correo electrónico.');
                 setIsLoading(false);
                 return;
             }
 
-            await sendPasswordResetEmail(auth, email);
+            await sendPasswordResetEmail(auth, email); // Envía el correo electrónico de restablecimiento de contraseña utilizando Firebase Auth
             // Mensaje de éxito
             setSuccessMessage('Tu solicitud ha sido procesada. Recibirás un correo con instrucciones para restablecer tu contraseña en breve. Por favor, revisa tu bandeja de entrada y la carpeta de spam(correo no deseado).');
             setEmail('');
-            setTimeout(() => router.push('/'), 5500);
-        } catch (err) {
+            setTimeout(() => router.push('/')); // Redirige al usuario a la página de inicio
+        } catch (err) { // Manejo de errores
             console.error("Error en el proceso de restablecimiento:", err.code, err.message);
             let friendlyMessage = 'Error al intentar restablecer la contraseña.';
             if (err.code === 'auth/invalid-email') {
@@ -67,8 +67,8 @@ function ForgotPasswordPage() {
         }
     };
 
-    return (
-        <Box
+    return ( // Renderiza el formulario de restablecimiento de contraseña
+        <Box // Contenedor principal con estilos
             sx={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -82,7 +82,7 @@ function ForgotPasswordPage() {
                 backgroundRepeat: 'no-repeat',
             }}
         >
-            <Box
+            <Box // Contenedor de la tarjeta de formulario
                 component="form"
                 onSubmit={handleSubmit}
                 sx={{
@@ -96,15 +96,15 @@ function ForgotPasswordPage() {
                     flexDirection: 'column',
                     gap: 2, // Espacio entre elementos
                 }}
-            >
-                <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', color: 'black' }}>
+            > 
+                <Typography variant="h4" gutterBottom sx={{ textAlign: 'center', color: 'black' }}> 
                     Restablecer Contraseña
                 </Typography>
 
                 {error && <Typography color="error" sx={{ textAlign: 'center' }}>{error}</Typography>}
                 {successMessage && <Typography color="success.main" sx={{ textAlign: 'center' }}>{successMessage}</Typography>}
 
-                <TextField
+                <TextField // Campo de entrada para el correo electrónico
                     label="Correo Electrónico"
                     variant="outlined"
                     fullWidth
@@ -121,7 +121,7 @@ function ForgotPasswordPage() {
                     required
                 />
 
-                <Button
+                <Button // Botón para enviar el formulario
                     type="submit"
                     variant="contained"
                     fullWidth

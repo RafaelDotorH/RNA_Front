@@ -1,11 +1,11 @@
 import PrincipalClient from './Evaluador';
 
-export const metadata = {
+export const metadata = { // Metadatos para la página principal
     title: "Página Principal - ADONIS",
     description: "El corazón de la aplicación ADONIS. Comienza tu análisis aquí.",
 };
 
-const PrincipalPage = () => {
+const PrincipalPage = () => { // Componente de la página principal
     return <PrincipalClient />;
 };
 

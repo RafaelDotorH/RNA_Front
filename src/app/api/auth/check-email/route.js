@@ -1,4 +1,3 @@
-// src/app/api/auth/check-email/route.js
 import { NextResponse } from 'next/server';
 import dbConnect from '@/app/lib/mongodb'; 
 import UserModel from '@/app/models/User';  
@@ -6,7 +5,8 @@ export async function GET(req) {
     await dbConnect();
 
      const { searchParams } = new URL(req.url);
-    const email = searchParams.get('email');
+    const email = searchParams.get('email'); //obtiene el parámetro email de la URL
+    // Verifica si el parámetro email está presente
 
     if (!email) {
         return NextResponse.json(
@@ -15,7 +15,8 @@ export async function GET(req) {
         );
     }
 
-    try {const normalizedEmail = email.trim().toLowerCase();
+    try {const normalizedEmail = email.trim().toLowerCase(); // Normaliza el email para evitar duplicados por mayúsculas/minúsculas
+        // Busca el usuario en la base de datos por email normalizado
 
         const existingUser = await UserModel.findOne({ email: normalizedEmail });
 
@@ -31,7 +32,7 @@ export async function GET(req) {
             );
         }
 
-    } catch (error) {
+    } catch (error) { // Manejo de errores en caso de que ocurra un problema al consultar la base de datos
         console.error('[API Check Email] Error al verificar el email en MongoDB:', error);
         return NextResponse.json(
             { message: 'Error en el servidor al verificar el correo electrónico.', error: error.message },

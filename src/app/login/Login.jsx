@@ -16,7 +16,7 @@ import { useRouter } from 'next/navigation';
 import CircularProgress from '@mui/material/CircularProgress';
 import '../CSS/login.css';
 
-import {
+import { // Firebase imports
     createUserWithEmailAndPassword,
     signInWithEmailAndPassword,
     sendEmailVerification
@@ -24,45 +24,45 @@ import {
 import { auth } from '../lib/firebasedb';
 
 
-function LoginPage() {
-    const [showPassword, setShowPassword] = useState(false);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [isLogin, setIsLogin] = useState(true);
-    const [email, setEmail] = useState('');
-    const [emailLogin, setEmailLogin] = useState('');
-    const [confirmPassword, setConfirmPassword] = useState('');
-    const [error, setError] = useState('');
-    const [successMessage, setSuccessMessage] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
-    const router = useRouter();
+function LoginPage() { // Componente de inicio de sesión y registro
+    const [showPassword, setShowPassword] = useState(false); // Estado para mostrar/ocultar la contraseña
+    const [username, setUsername] = useState(''); // Estado para almacenar el nombre de usuario
+    const [password, setPassword] = useState(''); // Estado para almacenar la contraseña
+    const [isLogin, setIsLogin] = useState(true); // Estado para determinar si el usuario está en modo de inicio de sesión o registro
+    const [email, setEmail] = useState(''); // Estado para almacenar el correo electrónico
+    const [emailLogin, setEmailLogin] = useState(''); // Estado para almacenar el correo electrónico en el modo de registro
+    const [confirmPassword, setConfirmPassword] = useState(''); // Estado para almacenar la confirmación de la contraseña
+    const [error, setError] = useState(''); // Estado para almacenar mensajes de error
+    const [successMessage, setSuccessMessage] = useState(''); // Estado para almacenar mensajes de éxito
+    const [isLoading, setIsLoading] = useState(false); // Estado para manejar el estado de carga
+    const router = useRouter(); // Hook de Next.js para manejar la navegación
 
-    const handleClickShowPassword = useCallback(() => {
+    const handleClickShowPassword = useCallback(() => { // Función para alternar la visibilidad de la contraseña
         setShowPassword((prev) => !prev);
     }, []);
 
-    const handleMouseDownPassword = useCallback((event) => {
+    const handleMouseDownPassword = useCallback((event) => { // Función para prevenir el comportamiento por defecto al hacer clic en el botón de visibilidad de la contraseña
         event.preventDefault();
     }, []);
 
 
-    const handleSubmit = async (event) => {
+    const handleSubmit = async (event) => { // Función para manejar el envío del formulario de inicio de sesión o registro
         event.preventDefault();
         setError('');
         setSuccessMessage('');
         setIsLoading(true);
 
-        if (isLogin) {
+        if (isLogin) { // Si el usuario está en modo de inicio de sesión
             if (!email || !password) {
                 setError("Por favor, ingresa tu correo y contraseña.");
                 setIsLoading(false);
                 return;
             }
-            try {
+            try { // Intenta iniciar sesión con Firebase Auth
                 const userCredential = await signInWithEmailAndPassword(auth, email, password);
                 const user = userCredential.user;
 
-                if (user.emailVerified) {
+                if (user.emailVerified) { // Verifica si el correo electrónico del usuario ha sido verificado
                     const idToken = await user.getIdToken(true);
                     const apiResponse = await fetch('/api/auth/login', {
                         method: 'POST',
@@ -70,7 +70,7 @@ function LoginPage() {
                         body: JSON.stringify({ email, idToken }),
                     });
 
-                    const apiData = await apiResponse.json();
+                    const apiData = await apiResponse.json(); // Convierte la respuesta de la API a JSON
 
                     if (apiResponse.ok) {
                         setSuccessMessage(apiData.message);
@@ -82,7 +82,7 @@ function LoginPage() {
                     setError('Tu correo electrónico no ha sido verificado. Por favor, revisa tu bandeja de entrada (y spam o no deseado) para el correo de verificación.');
                 }
 
-            } catch (err) {
+            } catch (err) { // Manejo de errores al iniciar sesión
                 console.error("Error al iniciar sesión con Firebase:", err.code, err.message);
                 let friendlyMessage = 'Error al iniciar sesión. Verifica tus credenciales.';
                 if (err.code === 'auth/user-not-found' || err.code === 'auth/wrong-password' || err.code === 'auth/invalid-credential') {
@@ -96,7 +96,7 @@ function LoginPage() {
             } finally {
                 setIsLoading(false);
             }
-        } else {
+        } else { // Si el usuario está en modo de registro
             if (!username || !email || !password || !confirmPassword) {
                 setError("Por favor, completa todos los campos para registrarte.");
                 setIsLoading(false);
@@ -112,7 +112,7 @@ function LoginPage() {
                 setIsLoading(false);
                 return;
             }
-            try {
+            try { // Intenta registrar al usuario con Firebase Auth
                 const apiResponseMongo = await fetch('/api/auth/register', {
                     method: 'POST',
                     headers: {
@@ -137,7 +137,7 @@ function LoginPage() {
                     setError(apiDataMongo.message || 'Error del servidor al procesar el registro.');
                 }
 
-            } catch (err) {
+            } catch (err) { // Manejo de errores al registrar
                 console.error("Error al registrar con Firebase:", err.code, err.message);
                 let friendlyMessage = 'Error al registrarse. Inténtalo de nuevo.';
                 if (err.code === 'auth/email-already-in-use') {
@@ -154,7 +154,7 @@ function LoginPage() {
         }
     };
 
-    const toggleMode = () => {
+    const toggleMode = () => { // Función para alternar entre el modo de inicio de sesión y el modo de registro
         setIsLogin(!isLogin);
         setError('');
         setSuccessMessage('');
@@ -165,7 +165,7 @@ function LoginPage() {
     };
 
 
-    return (
+    return ( // Renderiza el formulario de inicio de sesión o registro
         <Box className="my-component">
             <form onSubmit={handleSubmit} className={`card-3d-wrap ${!isLogin ? 'register-active' : ''}`}>
                 <div className="card-3d-wrapper">

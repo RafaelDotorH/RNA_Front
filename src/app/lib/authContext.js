@@ -4,20 +4,20 @@ import { onAuthStateChanged, getAuth } from 'firebase/auth';
 import { app } from '@/app/lib/firebasedb';
 import { getThemeForRole } from '@/app/CSS/dynamicStyles';
 
-const auth = getAuth(app);
-const AuthContext = createContext();
+const auth = getAuth(app); // Inicializa Firebase Auth con la app de Firebase
+const AuthContext = createContext(); // Crea el contexto de autenticación
 
-export const useAuth = () => useContext(AuthContext);
+export const useAuth = () => useContext(AuthContext); // Hook personalizado para acceder al contexto de autenticación|
 
-export const AuthProvider = ({ children }) => {
-    const [user, setUser] = useState(null);
-    const [loading, setLoading] = useState(true);
-    const [userRole, setUserRole] = useState('default');
-    const [theme, setTheme] = useState(getThemeForRole('default'));
-    const [isLoadingRole, setIsLoadingRole] = useState(true);
+export const AuthProvider = ({ children }) => { // Proveedor de contexto de autenticación
+    const [user, setUser] = useState(null); // Estado para almacenar el usuario autenticado
+    const [loading, setLoading] = useState(true); // Estado para manejar la carga de autenticación
+    const [userRole, setUserRole] = useState('default'); // Estado para almacenar el rol del usuario
+    const [theme, setTheme] = useState(getThemeForRole('default')); // Estado para almacenar el tema de la aplicación
+    const [isLoadingRole, setIsLoadingRole] = useState(true); // Estado para manejar la carga del rol del usuario
 
-    useEffect(() => {
-        const unsubscribe = onAuthStateChanged(auth, (user) => {
+    useEffect(() => { // Efecto para manejar el estado de autenticación del usuario
+        const unsubscribe = onAuthStateChanged(auth, (user) => { // Escucha los cambios en el estado de autenticación
             if (user) {
                 setUser(user);
             } else {
@@ -26,17 +26,17 @@ export const AuthProvider = ({ children }) => {
             }
             setLoading(false);
         });
-        return () => unsubscribe();
+        return () => unsubscribe(); // Limpia el listener al desmontar el componente
     }, []);
 
-    useEffect(() => {
+    useEffect(() => { // Efecto para obtener el rol del usuario autenticado
         const fetchUserRole = async () => {
             if (!user) {
                 setIsLoadingRole(false);
                 return;
             }
             setIsLoadingRole(true);
-            try {
+            try { // Realiza una solicitud a la API para obtener el rol del usuario
                 const response = await fetch('/api/user/role');
                 const data = await response.json();
                 if (response.ok && data.role) {
@@ -54,11 +54,11 @@ export const AuthProvider = ({ children }) => {
         fetchUserRole();
     }, [user]);
 
-    useEffect(() => {
+    useEffect(() => { // Efecto para actualizar el tema de la aplicación basado en el rol del usuario
         setTheme(getThemeForRole(userRole));
     }, [userRole]);
 
-    const logout = async () => {
+    const logout = async () => { // Función para cerrar sesión del usuario
          try {
             await fetch('/api/auth/logout', { method: 'POST' });
         } catch (error) {
@@ -70,7 +70,7 @@ export const AuthProvider = ({ children }) => {
         setLoading(false);
     };
 
-    const value = {
+    const value = { // Valor del contexto de autenticación
         user,
         loading: loading || isLoadingRole,
         logout,
@@ -78,7 +78,7 @@ export const AuthProvider = ({ children }) => {
         theme,
     };
 
-    if (!theme) {
+    if (!theme) { // Si el tema aún no está cargado, muestra un mensaje de carga
         return <div>Cargando tema...</div>;
     }
 

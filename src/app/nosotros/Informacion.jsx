@@ -6,17 +6,17 @@ import MenuNav from '@/Components/menuNav';
 import Fooder from '@/Components/fooder';
 import { useAuth } from '@/app/lib/authContext';
 
-const Nosotros = () => {
+const Nosotros = () => { // Componente para la página "Sobre Nosotros"
     const { user, loading, theme } = useAuth();
     const router = useRouter();
 
-    useEffect(() => {
+    useEffect(() => { // Efecto para redirigir al usuario a la página de menú si está cargando
             if (loading) {
                 router.push('/menu');
             }
         }, [loading, user, router]);
 
-    if (loading) {
+    if (loading) { // Si la autenticación está cargando, muestra un mensaje de carga
         return (
             <div style={{
                 display: 'flex',
@@ -34,7 +34,7 @@ const Nosotros = () => {
         return null;
     }
     
-    return (
+    return ( // Renderiza el contenido de la página "Sobre Nosotros"
         <>
             <div className='container pt-5 mb-5'>
                 <div className='row'>
