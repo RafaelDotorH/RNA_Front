@@ -6,7 +6,7 @@ import MenuNav from '@/Components/menuNav';
 import Fooder from '@/Components/fooder';
 
 const BibliotecaConRoles = () => {
-    const { user, loading: authLoading } = useAuth();
+    const { user, loading, theme } = useAuth();
     const router = useRouter();
     
     const [userRole, setUserRole] = useState(null);
@@ -19,6 +19,12 @@ const BibliotecaConRoles = () => {
     const [isLoading, setIsLoading] = useState(true);
     const [showModal, setShowModal] = useState(false);
     const [enlaceAEliminar, setEnlaceAEliminar] = useState(null);
+
+    useEffect(() => { // Efecto para redirigir al usuario a la página de menú si está cargando
+            if (loading) {
+                router.push('/menu');
+            }
+        }, [loading, user, router]);
 
     const obtenerFechaLocal = () => {
         const ahora = new Date();
