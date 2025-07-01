@@ -1,7 +1,7 @@
 import PrincipalClient from './Evaluador';
 
 export const metadata = { // Metadatos para la página principal
-    title: "Página Principal - ADONIS",
+    title: "Evaluacion de imagenes - ADONIS",
     description: "El corazón de la aplicación ADONIS. Comienza tu análisis aquí.",
 };
 
