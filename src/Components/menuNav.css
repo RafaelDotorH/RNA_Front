@@ -139,6 +139,7 @@ select { padding: .8em 1.2em; border: 1px solid hsl(var(--black)); font-size: va
     display: flex;
     justify-content: center;
     align-items: center;
+    color: #c6ce00;
 }
 .navbar-item-inner-icon-wrapper ion-icon {
     font-size: calc(var(--navbar-buttons) - 1rem);
@@ -153,10 +154,12 @@ select { padding: .8em 1.2em; border: 1px solid hsl(var(--black)); font-size: va
     overflow: hidden;
     opacity: 0;
     margin-left: 0.5em;
+    color: #c6ce00;
 }
 #navbar:hover .link-text {
     width: calc(100% - 3em - 0.5em);
     opacity: 1;
+    color: #c6ce00;
 }
 
 /* === Botón del Menú Móvil === */
@@ -260,11 +263,13 @@ select { padding: .8em 1.2em; border: 1px solid hsl(var(--black)); font-size: va
         font-size: 0.9rem;
         white-space: nowrap;
         margin-left: 0; /* El margin-right del wrapper del ícono ya da espacio */
+        color: #c6ce00;
     }
 
     #navbar:hover .link-text { /* El hover de escritorio no es relevante aquí */
         width: auto;
         opacity: 1;
+        color: #c6ce00;
     }
 
     .mobile-only-separator {
