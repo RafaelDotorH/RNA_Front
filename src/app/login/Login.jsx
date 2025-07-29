@@ -168,8 +168,8 @@ function LoginPage() { // Componente de inicio de sesión y registro
     return ( // Renderiza el formulario de inicio de sesión o registro
         <Box className="my-component">
             <form onSubmit={handleSubmit} className={`card-3d-wrap ${!isLogin ? 'register-active' : ''}`}>
-                <div className="card-3d-wrapper">
-                    <div className="card-front">
+                <div className="card-3d-wrapper" fetchPriority="high">
+                    <div className="card-front" fetchPriority="high">
                         <div className="center-wrap">
                             <div className="section center">
                                 <Typography variant="h4" gutterBottom>
