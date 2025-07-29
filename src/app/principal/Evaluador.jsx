@@ -13,7 +13,7 @@ const PrincipalPage = () => {
     const router = useRouter();
 
     // Estado para el rol de administrador
-    const [isAdmin, setIsAdmin] = useState(false);
+    const [userRole, setUserRole] = useState(null);
 
     // Estados para la funcionalidad de predicción.
     const [result, setResult] = useState(null); // Almacena el resultado de la predicción de la API.
@@ -38,38 +38,20 @@ const PrincipalPage = () => {
             router.push('/menu');
         }
     }, [loading, user, router]);
-
-    // **NUEVO**: useEffect para obtener el rol del usuario desde el token.
+    // Verifica si el usuario es administrador al cargar la página.
     useEffect(() => {
-        const fetchUserRole = async () => {
-            const token = localStorage.getItem('token');
-            if (token && user) {
+            const fetchUserRole = async () => {
                 try {
-                    const response = await fetch('/api/user/role', {
-                        headers: {
-                            'Authorization': `Bearer ${token}`
-                        }
-                    });
-                    if (response.ok) {
-                        const data = await response.json();
-                        setIsAdmin(data.role === 'administrador');
-                    } else {
-                        setIsAdmin(false);
-                        console.error('Error al verificar el rol del usuario.');
-                    }
+                    const response = await fetch('../api/user/role');
+                    const data = await response.json();
+                    setUserRole(response.ok && data.role ? data.role : 'cliente');
                 } catch (error) {
-                    setIsAdmin(false);
-                    console.error('Error en la llamada a la API de rol:', error);
+                    console.error("Error al obtener el rol:", error);
+                    setUserRole('cliente');
                 }
-            } else {
-                setIsAdmin(false);
-            }
-        };
-
-        if (!loading) {
+            };
             fetchUserRole();
-        }
-    }, [user, loading]);
+        }, []);
 
 
     const fetchModels = useCallback(async () => {
@@ -282,6 +264,8 @@ const PrincipalPage = () => {
     const pageStyle = theme ? { backgroundColor: theme.appBackgroundColor, color: theme.appTextColor } : {};
     const buttonStyle = theme ? { backgroundColor: theme.buttonBackground, color: theme.buttonText, border: 'none' } : {};
 
+    const isAdmin = userRole === 'administrador'; // Verifica si el usuario es administrador basado en el rol obtenido.
+
     return (
         <>
             <div style={pageStyle} className='container-fluid min-vh-100 d-flex flex-column align-items-center justify-content-center pt-5 pb-5'>
@@ -340,7 +324,6 @@ const PrincipalPage = () => {
                     </div>
                 </div>
 
-                {/* **MODIFICADO**: Se usa el estado 'isAdmin' para la renderización condicional. */}
                 {isAdmin && (
                     <div className='card p-3 p-md-4 shadow-lg mt-4' style={{ maxWidth: '600px', width: '90%' }}>
                         <h4 className="text-center mb-3">Subir Nuevo Modelo</h4>
