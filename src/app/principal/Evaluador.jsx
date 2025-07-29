@@ -31,7 +31,6 @@ const PrincipalPage = () => {
     const [configFile, setConfigFile] = useState(null); // Almacena el archivo de configuración (.json) a subir.
     const [uploadStatus, setUploadStatus] = useState(''); // Mensaje para mostrar el estado de la subida del modelo.
 
-    const API_BASE_URL = 'http://localhost:8000';
 
     useEffect(() => {
         if (loading) {
@@ -57,7 +56,7 @@ const PrincipalPage = () => {
     const fetchModels = useCallback(async () => {
         setResult(null); // Limpia cualquier resultado de predicción anterior.
         try {
-            const response = await fetch(`${API_BASE_URL}/models/`);
+            const response = await fetch(`${process.env.SERVER_URL}/models/`);
             if (!response.ok) {
                 throw new Error(`Error del servidor: ${response.status}`);
             }
@@ -90,7 +89,7 @@ const PrincipalPage = () => {
         }
 
         try {
-            const response = await fetch(`${API_BASE_URL}/predict/${selectedModel}`, {
+            const response = await fetch(`${process.env.SERVER_URL}/predict/${selectedModel}`, {
                 method: 'POST',
                 body: formData,
             });
