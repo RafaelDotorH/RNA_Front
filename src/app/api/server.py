@@ -11,39 +11,34 @@ from fastapi.middleware.cors import CORSMiddleware
 from PIL import Image
 
 # --- CONFIGURACIÓN GLOBAL ---
-MODELS_DIR = Path("models")
-MODELS = {}
+MODELS_DIR = Path("models") # Directorio donde se guardan los modelos y configuraciones
+MODELS = {} # Diccionario para almacenar modelos cargados en memoria
 
 # --- LÓGICA DE CARGA DE MODELOS ---
-def load_single_model(model_path: Path):
-    """Carga un único modelo y su configuración en memoria."""
-    model_name = model_path.stem
-    config_path = model_path.with_suffix(".json")
+def load_single_model(model_path: Path): 
+    model_name = model_path.stem # Nombre del modelo sin extensión
+    config_path = model_path.with_suffix(".json") # Ruta del archivo de configuración
 
     if not config_path.exists():
-        print(f"Advertencia: No se encontró config para '{model_path.name}'.")
+        print(f"Advertencia: No se encontró config para '{model_path.name}'.") 
         return False
 
-    try:
-        with open(config_path, "r") as f:
+    try: 
+        with open(config_path, "r", encoding="UTF-8") as f: 
             config = json.load(f)
         
         model = tf.keras.models.load_model(model_path)
-        MODELS[model_name] = {"model": model, "config": config}
-        print(f"✅ Modelo '{model_name}' cargado/recargado exitosamente.")
-        return True
+        MODELS[model_name] = {"model": model, "config": config} 
+        print(f"✅ Modelo '{model_name}' cargado/recargado exitosamente.") 
+        return True 
     except Exception as e:
         print(f"❌ Error cargando el modelo '{model_name}': {e}")
         return False
 
-# --- GESTOR DE CICLO DE VIDA (LIFESPAN) ---
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    """
-    Gestiona los eventos de inicio y apagado de la aplicación.
-    Al iniciar, crea el directorio de modelos si no existe y carga todos los modelos.
-    """
-    # --- CÓDIGO DE INICIO (STARTUP) ---
+# --- GESTOR DE CICLO DE VIDA ---
+@asynccontextmanager 
+async def lifespan(app: FastAPI): 
+    # --- CÓDIGO DE INICIO ---
     MODELS_DIR.mkdir(exist_ok=True)
     print("Iniciando aplicación y cargando modelos existentes...")
     for model_file in MODELS_DIR.glob("*.h5"):
@@ -53,17 +48,13 @@ async def lifespan(app: FastAPI):
     
     yield # La aplicación se ejecuta en este punto
 
-    # --- CÓDIGO DE APAGADO (SHUTDOWN) ---
-    # Este código se ejecuta cuando la aplicación se detiene.
     print("Apagando la aplicación y limpiando recursos...")
     MODELS.clear()
 
-# --- APLICACIÓN FASTAPI ---
 # Se pasa el gestor 'lifespan' al crear la instancia de FastAPI.
 app = FastAPI(lifespan=lifespan)
 
-# --- MIDDLEWARE (CORS) ---
-app.add_middleware(
+app.add_middleware( 
     CORSMiddleware,
     allow_origins=["*"],
     allow_credentials=True,
@@ -71,9 +62,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# --- FUNCIÓN DE PREDICCIÓN ---
-def process_and_predict(image_bytes: bytes, model_data: dict) -> str:
-    # (El código de esta función no cambia)
+def process_and_predict(image_bytes: bytes, model_data: dict) -> str: 
     model = model_data["model"]
     config = model_data["config"]
     image_size = tuple(config["image_size"])
@@ -86,13 +75,12 @@ def process_and_predict(image_bytes: bytes, model_data: dict) -> str:
 
     prediction = model.predict(img_batch)
     
-    score = np.max(prediction[0])
+    score = np.max(prediction[0]) 
     class_index = np.argmax(prediction[0])
     class_name = class_names[class_index]
 
     return f"{class_name} ({score:.2%})"
 
-# --- ENDPOINTS DE LA API ---
 
 @app.get("/")
 def read_root():
@@ -100,12 +88,17 @@ def read_root():
 
 @app.get("/models/")
 def get_available_models():
-    """Devuelve una lista de los modelos disponibles."""
     return {"models": list(MODELS.keys())}
+
+@app.get("/models/{model_name}/config")
+def get_model_config(model_name: str):
+    if model_name not in MODELS:
+        raise HTTPException(status_code=404, detail=f"Configuración para el modelo '{model_name}' no encontrada.")
+    
+    return MODELS[model_name]["config"]
 
 @app.post("/predict/{model_name}")
 async def predict(model_name: str, image: UploadFile = File(...)):
-    """Realiza una predicción usando el modelo especificado."""
     if model_name not in MODELS:
         raise HTTPException(status_code=404, detail=f"Modelo '{model_name}' no encontrado.")
     
@@ -114,12 +107,9 @@ async def predict(model_name: str, image: UploadFile = File(...)):
     
     return {"model_used": model_name, "result": prediction_result}
 
-# --- ENDPOINT PARA ADMINISTRADORES ---
-@app.post("/upload-model/")
+@app.post("/models/")
 async def upload_model(model_file: UploadFile = File(...), config_file: UploadFile = File(...)):
-    """
-    Endpoint para que un administrador suba un nuevo modelo y su configuración.
-    """
+   
     # Validar nombres de archivo
     model_filename = Path(model_file.filename)
     config_filename = Path(config_file.filename)
