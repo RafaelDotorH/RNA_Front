@@ -20,6 +20,9 @@ const PrincipalPage = () => {
     const [image, setImage] = useState(null); // Almacena el archivo de imagen subido por el usuario.
     const [models, setModels] = useState([]); // Almacena la lista de modelos disponibles obtenidos de la API.
     const [selectedModel, setSelectedModel] = useState(''); // Almacena el nombre del modelo seleccionado por el usuario.
+    
+    // Estado para almacenar la descripción del modelo seleccionado.
+    const [modelDescription, setModelDescription] = useState('');
 
     // Estados y referencias para la funcionalidad de la cámara.
     const videoRef = useRef(null); // Referencia al elemento <video> para mostrar la cámara.
@@ -31,32 +34,33 @@ const PrincipalPage = () => {
     const [configFile, setConfigFile] = useState(null); // Almacena el archivo de configuración (.json) a subir.
     const [uploadStatus, setUploadStatus] = useState(''); // Mensaje para mostrar el estado de la subida del modelo.
 
+    const API_BASE_URL = process.env.SERVER_URL || 'http://localhost:8000';
 
     useEffect(() => {
         if (loading) {
             router.push('/menu');
         }
     }, [loading, user, router]);
+    
     // Verifica si el usuario es administrador al cargar la página.
     useEffect(() => {
-            const fetchUserRole = async () => {
-                try {
-                    const response = await fetch('../api/user/role');
-                    const data = await response.json();
-                    setUserRole(response.ok && data.role ? data.role : 'cliente');
-                } catch (error) {
-                    console.error("Error al obtener el rol:", error);
-                    setUserRole('cliente');
-                }
-            };
-            fetchUserRole();
-        }, []);
-
+        const fetchUserRole = async () => {
+            try {
+                const response = await fetch('../api/user/role');
+                const data = await response.json();
+                setUserRole(response.ok && data.role ? data.role : 'cliente');
+            } catch (error) {
+                console.error("Error al obtener el rol:", error);
+                setUserRole('cliente');
+            }
+        };
+        fetchUserRole();
+    }, []);
 
     const fetchModels = useCallback(async () => {
         setResult(null); // Limpia cualquier resultado de predicción anterior.
         try {
-            const response = await fetch(`${process.env.SERVER_URL}/models/`);
+            const response = await fetch(`${API_BASE_URL}/models/`);
             if (!response.ok) {
                 throw new Error(`Error del servidor: ${response.status}`);
             }
@@ -72,14 +76,36 @@ const PrincipalPage = () => {
             console.error("Error al obtener los modelos:", error);
             setResult(`Error al obtener modelos: ${error.message}`);
         }
-    }, []); // No tiene dependencias, por lo que solo se crea una vez.
+    }, [API_BASE_URL]); // Se agrega API_BASE_URL como dependencia
 
     useEffect(() => {
         fetchModels();
     }, [fetchModels]);
 
+    useEffect(() => { // Efecto para obtener la descripción del modelo seleccionado.
+        const fetchModelDescription = async () => { 
+            if (!selectedModel) {
+                setModelDescription('');
+                return;
+            }
+            try {
+                const modelName = selectedModel.trim(); 
+                const response = await fetch(`${API_BASE_URL}/models/${encodeURIComponent(modelName)}/config`);
+                if (!response.ok) {
+                    throw new Error(`No se pudo cargar la descripción para ${selectedModel}`);
+                }
+                const config = await response.json();
+                setModelDescription(config.description || 'No hay descripción disponible para este modelo.');
+            } catch (error) {
+                console.error("Error al obtener la descripción del modelo:", error);
+                setModelDescription('No se pudo cargar la descripción.');
+            }
+        };
 
-    const performPrediction = useCallback(async (formData) => {
+        fetchModelDescription();
+    }, [selectedModel, API_BASE_URL]);
+
+    const performPrediction = useCallback(async (formData) => { 
         if (!selectedModel) {
             setResult("Por favor, selecciona un modelo antes de evaluar.");
             return;
@@ -89,7 +115,7 @@ const PrincipalPage = () => {
         }
 
         try {
-            const response = await fetch(`${process.env.SERVER_URL}/predict/${selectedModel}`, {
+            const response = await fetch(`${API_BASE_URL}/predict/${selectedModel}`, {
                 method: 'POST',
                 body: formData,
             });
@@ -109,7 +135,7 @@ const PrincipalPage = () => {
             console.error('Error en la predicción:', error);
             setResult(`Ocurrió un error: ${error.message}`);
         }
-    }, [selectedModel, isCameraOpen]);
+    }, [selectedModel, isCameraOpen, API_BASE_URL]);
 
     // --- MANEJO DE LA CÁMARA ---
 
@@ -281,6 +307,11 @@ const PrincipalPage = () => {
                                 <option>No hay modelos disponibles</option>
                             )}
                         </select>
+                        {modelDescription && (
+                            <div className="mt-2 p-2 border rounded bg-light text-dark small">
+                                <p className="mb-0 fst-italic">{modelDescription}</p>
+                            </div>
+                        )}
                     </div>
 
                     {!isCameraOpen && (
